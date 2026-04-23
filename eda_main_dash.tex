@@ -1,0 +1,218 @@
+% Created 2026-04-20 Mon 14:56
+% Intended LaTeX compiler: pdflatex
+\documentclass[11pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\usepackage{minted}
+\author{ZSR}
+\date{\today}
+\title{Generative model of LoRa WAN}
+\hypersetup{
+ pdfauthor={ZSR},
+ pdftitle={Generative model of LoRa WAN},
+ pdfkeywords={},
+ pdfsubject={},
+ pdfcreator={},
+ pdflang={English}}
+\begin{document}
+
+\maketitle
+\section{Introduction}
+\label{sec:org5425f7e}
+
+\textbf{Cybersecurity Digital Twins and LoRaWAN in the context of Smart-Cities}.
+
+Cybersecurity Digital Twins (CSDTs) are digital representations of connected systems that combine information about assets, configurations, dependencies, and possible attack paths. In the context of the \href{https://www.mirandaproject.eu/}{MIRANDA project}, a CSDT is used to model the security posture of complex, heterogeneous, and multi-ownership ICT systems, so that operators can analyse risks, anticipate threats, and support detection and response in a proactive but non-invasive way.
+
+CSDTs are particularly important in smart cities because urban services rely on many interconnected platforms, devices, and providers, often organised as evolving digital service chains. In such settings, limited visibility across organisational boundaries can make attacks harder to detect and contain, which makes a shared and adaptive security view especially valuable.
+
+LPWAN stands for \emph{Low-Power Wide-Area Network}. It refers to wireless technologies designed to connect devices over long distances while keeping energy consumption low. \href{https://lora-alliance.org/about-lorawan/}{LoRaWAN} is an open LPWAN protocol for IoT systems that supports bidirectional communication, end-to-end security, mobility, and localisation services over the LoRa physical layer.
+
+In this setting, LoRaWAN fits at the edge of the smart-city infrastructure, where sensors and actuators collect data from streets, buildings, transport systems, as well as utilities, and forward it to gateways and other services. It therefore forms part of the broader digital service chain that should be observed and protected.
+
+Here, security can be improved by adding a first layer of defence based on the physical aspects of communication, such as RSSI, SNR, ADR, etc.. These features do not replace other protection mechanism. Instead, they add early context for anomaly detection, device verification, and location-consistency checks, which can help reveal suspicious behaviour before it affects other layers of the system.
+
+\begin{minted}[frame=lines,fontsize=\scriptsize,linenos=]{python}
+st.image("assets/smart_city_baner.png")
+
+motivation = """
+### Cybersecurity Digital Twins and LoRaWAN in the context of Smart-Cities ... 
+
+Cybersecurity Digital Twins (CSDTs) are digital representations of connected systems that combine information about assets, configurations, dependencies, and possible attack paths. In the context of the [MIRANDA project](https://www.mirandaproject.eu/), a CSDT is used to model the security posture of complex, heterogeneous, and multi-ownership ICT systems, so that operators can analyse risks, anticipate threats, and support detection and response in a proactive but non-invasive way.
+
+CSDTs are particularly important in smart cities because urban services rely on many interconnected platforms, devices, and providers, often organised as evolving digital service chains. In such settings, limited visibility across organisational boundaries can make attacks harder to detect and contain, which makes a shared and adaptive security view especially valuable.
+
+LPWAN stands for _Low-Power Wide-Area Network_. It refers to wireless technologies designed to connect devices over long distances while keeping energy consumption low. [LoRaWAN](https://lora-alliance.org/about-lorawan/) is an open LPWAN protocol for IoT systems that supports bidirectional communication, end-to-end security, mobility, and localisation services over the LoRa physical layer.
+
+In this setting, LoRaWAN fits at the edge of the smart-city infrastructure, where sensors and actuators collect data from streets, buildings, transport systems, as well as utilities, and forward it to gateways and other services. It therefore forms part of the broader digital service chain that should be observed and protected.
+
+Here, security can be improved by adding a first layer of defence based on the physical aspects of communication, such as RSSI, SNR, ADR, etc.. These features do not replace other protection mechanism. Instead, they add early context for anomaly detection, device verification, and location-consistency checks, which can help reveal suspicious behaviour before it affects other layers of the system.
+
+"""
+
+st.markdown(motivation)
+\end{minted}
+\section{Motivation}
+\label{sec:orgc354a7c}
+
+Probabilistic modelling of network traffic can support both anomaly detection and synthetic data generation. Such models can help to identify transmissions that deviate from expected behaviour, while also generating realistic samples for testing monitoring and  components analysis.
+
+This document presents an exploratory data analysis of the Medellin LoRaWAN dataset and an initial feature-engineering stage, as a preliminary step towards a complete modelling pipeline. The main focus is to refine problem representation.
+
+The dataset provides a strong basis for our work because as it was collected over four months in a real urban LoRaWAN deployment. The available variables describe several aspects of communication, including timing and device information, geometric and link-budget parameters, transmission settings, environmental conditions, and channel indicators such as RSSI, SNR, and time on air. There are also other features of this dataset, that are important for us, that will be discussed in following sections.
+
+\begin{itemize}
+\item We go for ML approach -- easy to maintain, flexible, expertise accessible to maintainers.
+\item It is a better approach than complex network simulations [cite lora sim. tools].
+\item Add illustration of ML.
+\end{itemize}
+
+\begin{minted}[frame=lines,fontsize=\scriptsize,linenos=]{python}
+st.image("assets/lora_dark.svg")
+
+description = """
+### Motivation.
+
+Probabilistic modelling of network traffic can support both anomaly detection and synthetic data generation. Such models can help to identify transmissions that deviate from expected behaviour, while also generating realistic samples for testing monitoring and  components analysis.
+
+This document presents an exploratory data analysis of the Medellin LoRaWAN dataset and an initial feature-engineering stage, as a preliminary step towards a complete modelling pipeline. The main focus is to refine problem representation.
+
+The dataset provides a strong basis for our work because as it was collected over four months in a real urban LoRaWAN deployment. The available variables describe several aspects of communication, including timing and device information, geometric and link-budget parameters, transmission settings, environmental conditions, and channel indicators such as RSSI, SNR, and time on air. There are also other features of this dataset, that are important for us, that will be discussed in following sections.
+
+
+
+"""
+
+st.markdown(description)
+
+
+col1, col2, col3 = st.columns([1,2,1])
+with col2:
+    st.image("assets/anomaly_dark.svg", width=500)
+
+\end{minted}
+\section{Overview of the data}
+\label{sec:org65dbfeb}
+In our studies we are using \href{https://www.mdpi.com/2306-5729/8/1/4}{Medellin} in Chile -- published at \href{https://github.com/magonzalezudem/MDPI\_LoRaWAN\_Dataset\_With\_Environmental\_Variables}{GitHub}. As with any machine-learning system, model quality is limited by the quality, coverage, and structure of the underlying data. Although the Medellín dataset contains measurements from only four devices, this is precisely what makes it a useful cybersecurity case study. It captures a small, well-characterised LoRaWAN deployment over four months in a real urban setting, together with an unusually rich set of environmental, link-budget, and channel variables. This provides detailed visibility into a realistic maintenance scenario, where some latent factors, such as device configuration, placement, and local shadowing, are only weakly randomised, while other factors, including environmental conditions, are well sampled over time. In modelling terms, this creates a setting in which irreducible variability in the observations coexists with uncertainty caused by limited coverage of devices and configurations, that is, a combination of aleatoric and epistemic uncertainty.
+
+
+This dataset contains \textbf{990,750 LoRaWAN transmission records} collected from multiple End‑Nodes (EN) communicating with a Gateway (GW). Each row corresponds to a single transmission with physical, environmental, and link‑quality measurements.
+\section{Overview of features}
+\label{sec:org00b8353}
+
+In this section we focus on feature selection and engineering,  i.e. what we will include the final training set, what will be modified, and what can be dropped. In other words, we need to decide what will count as a representation of the network state, or at least of those aspects of the state that matter for detection. By network state, we mean an abstraction of the available data that allows us to distinguish legitimate traffic from anomalies.
+
+Here, we focus on the physical and hardware aspects of communication, so the state may be taken as a function of frame and gateway metadata, such as RSSI, SNR, frequency, or spreading factor. However, bare in mind that within MIRANDA and development of cyber-security digital twins this is only part of the challenge. The idea is that, if an impostor joins the network, the new device, being in an unusual location, may leave an unusual signature in the relation between the features we choose to include -- for example between declared coordinates and received signal strength. In LoRaWAN, many of these features are encoded in the metadata attached to transmissions, so the designer has plenty of freedom in choosing what aspect of the network will be modified.
+
+The goal here is in some sense optimal selection. We probably want to avoid redundant features or ones that will rarely available in the context of a CS digital twin. In other words, we need a sufficient minimal representation of the network state (sentence to improve).
+
+\textbf{Features related to propagation}
+
+The current dataset is useful in this respect because it provides a rich set of timing, link-budget, environmental, and channel variables from a real deployment, which gives us many possible starting points for a representative model. At the same time, we should stay with quantities that are commonly used in practice. For example, quantities such as RSSI and SNR should be included explicitly, while some environmental conditions, such as humidity, are better treated implicitly, through uncertainty (unless they are part of the deployed system). A sensible way to approach this challenge is to start with key property that will pull, in some sense, all the features we need, which also we can later augment.
+
+We start with the assertion, that simplest useful digital twin will have certain ability to predict network modifications. The most straightforward way to do it, is to expand it by adding another end device, of known hardware, at a new location. Therefore distance must enter the state description, together with RSSI. By definition,
+
+$$
+\mathrm{SNR} = \mathrm{RSSI} - P_n,
+$$
+
+where $$P_n$$ is the noise power. Therefore, by including also SNR we will improve our representation. For readers that are more ML focused, we remind that we are working here in logarithmic scales so rations proportions are represented by differences and sums. Let us investigate this through a propagation model. A standard choice is the log-distance path-loss model,
+
+$$
+\def \PL {\mathrm{PL}}
+\PL(d) = \PL(d_0) + 10 n \log_{10} \left( \frac{d}{d_0} \right) + X_\sigma,
+$$
+
+where \(\mathrm{PL}(d_0)\) is the path loss at a reference distance $$d_0$$, $$n$$ is the path-loss exponent, \(d\) is the distance between transmitter and receiver, and $$X_\sigma$$ is a shadowing term, often \(X_\sigma \sim \mathcal{N}(0, \sigma)\). So it seems that this segment of features is complete. We will expand on in a moment. First, we introduce the first element of feature engineering.
+
+\textbf{Feature engineering.}
+
+It follows that the most convenient way to represent distance is on a logarithmic scale. This is consistent with the propagation models introduced above. Also, when we later derive the expected path loss, it may be more convenient, at least for prediction, to work with expected or estimated noise power rather than with SNR itself. In the context of this research, most of the features is in optimal representations simple because industry standards are already optimised for clarity and simplicity. For example, SNR and RSSI are almost always given in dB or dBm units.
+
+\textbf{Contextual parameters}
+
+Will other features matter as well? Let us consider the more advanced urban Okumura--Hata model
+
+$$
+\mathrm{PL}(\ldots) = A + B \log_{10}(f_c) - C \log_{10}(h_b) - a(h_m) + \left(D - E \log_{10}(h_b)\right)\log_{10}(d),
+$$
+
+where $$f_c$$ is the carrier frequency, $$h_b$$ is the base-station antenna height, and $$h_m$$ is the end-device antenna height. The correction term $$a(h_m)$$ accounts for the receiver antenna height and, in practice, depends on the urban setting. Capital letters represent to be estimated. In qualitative terms, the model says that path loss grows with distance and frequency, while higher antennas placements reduces it.
+
+These are important considerations. It would therefore be tempting to include these parameters in the dataset.
+
+However, such information is not usually available as part of the metadata. It is therefore better to treat it as a bias term in the path loss, and as one source of epistemic uncertainty. Frequency, on the other hand, appears in the model and is often reported. One could argue that, because the adaptive range is narrow, its main effect is again a bias term. Should it then be included? On the ground of satisfying propagation model, probably not, at least not in the context of this dataset. However, there are other reasons to include this aspect of communication.
+
+\textbf{ADR policy and other features}
+
+\ldots{}
+
+\begin{minted}[frame=lines,fontsize=\scriptsize,linenos=]{python}
+st.markdown(r'''
+
+### Overview of features
+
+In this section we focus on feature selection and engineering,  i.e. what we will include in the final training set, what will be modified, and what can be dropped. In other words, we need to decide what will count as a representation of the network state, or at least of those aspects of the state that matter for detection. By network state, we mean an abstraction of the available data that allows us to distinguish legitimate traffic from anomalies.
+
+
+**The paradgim**
+
+Here, we focus on the physical and hardware aspects of communication, so the state may be taken as a function of frame and gateway metadata, such as RSSI, SNR, frequency, or spreading factor. However, bare in mind that within MIRANDA and development of cyber-security digital twins this is only part of the challenge. The idea is that, if an impostor joins the network, the new device, being in an unusual location, may leave an unusual signature in the relation between the features we choose to include -- for example between declared coordinates and received signal strength. In LoRaWAN, many of these features are encoded in the metadata attached to transmissions, so the designer has plenty of freedom in choosing what aspect of the network will be modified.
+
+
+**The strategy**
+
+The current dataset is useful in this respect because it provides a rich set of timing, link-budget, environmental, and channel variables from a real deployment, which gives us many possible starting points for a representative model. At the same time, we should stay with quantities that are commonly used in practice. For example, quantities such as RSSI and SNR should be included explicitly, while some environmental conditions, such as humidity, are better treated implicitly, through uncertainty (unless they are part of the deployed system). A sensible way to approach this challenge is to start with key property that will pull, in some sense, all the features we need, which also we can later augment.
+
+
+**Features related to propagation**
+
+We start with the assertion, that simplest useful digital twin will have certain ability to predict network modifications. The most straightforward way to do it, is to expand it by adding another end device, of known hardware, at a new location. Therefore distance must enter the state description, together with RSSI. By definition,
+$$
+\mathrm{SNR} = \mathrm{RSSI} - P_n,
+$$
+where $$P_n$$ is the noise power. Therefore, by including also SNR we will improve our representation. For readers that are more ML focused, we remind that we are working here in logarithmic scales so rations proportions are represented by differences and sums.
+
+Will other features matter as well? Let us investigate this through a propagation model. A standard choice is the log-distance path-loss model,
+$$
+\def \PL {\mathrm{PL}}
+\PL(d) = \PL(d_0) + 10 n \log_{10} \left( \frac{d}{d_0} \right) + X_\sigma,
+$$
+where $\mathrm{PL}(d_0)$ is the path loss at a reference distance $$d_0$$, $$n$$ is the path-loss exponent, $d$ is the distance between transmitter and receiver, and $$X_\sigma$$ is a shadowing term, often $X_\sigma \sim \mathcal{N}(0, \sigma)$. So it seems that this segment of features is complete. We will expand on this later.
+
+
+**Feature engineering.**
+
+It follows that the most convenient way to represent distance is on a logarithmic scale. This is consistent with the propagation models introduced above. Also, when we later derive the expected path loss, it may be more convenient, at least for prediction, to work with expected or estimated noise power rather than with SNR itself. In the context of this research, most of the features is in optimal representations simple because industry standards are already optimised for clarity and simplicity. For example, SNR and RSSI are almost always given in dB or dBm units.
+
+**Contextual parameters**
+
+Will other features matter as well? Let us consider the more advanced urban Okumura--Hata model
+
+$$
+\mathrm{PL}(\ldots) = A + B \log_{10}(f_c) - C \log_{10}(h_b) - a(h_m) + \left(D - E \log_{10}(h_b)\right)\log_{10}(d),
+$$
+
+where $$f_c$$ is the carrier frequency, $$h_b$$ is the base-station antenna height, and $$h_m$$ is the end-device antenna height. The correction term $$a(h_m)$$ accounts for the receiver antenna height and, in practice, depends on the urban setting. Capital letters represent to be estimated. In qualitative terms, the model says that path loss grows with distance and frequency, while higher antennas placements reduces it.
+
+These are important considerations. It would therefore be tempting to include these parameters in the dataset.
+
+However, such information is not usually available as part of the metadata. It is therefore better to treat it as a bias term in the path loss, and as one source of epistemic uncertainty. Frequency, on the other hand, appears in the model and is often reported. One could argue that, because the adaptive range is narrow, its main effect is again a bias term. Should it then be included? On the ground of satisfying propagation model, probably not, at least not in the context of this dataset. However, there are other reasons to include this aspect of communication.
+
+**ADR policy and other features**
+...
+
+''')
+
+\end{minted}
+\end{document}

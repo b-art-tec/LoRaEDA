@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2026-03-21 Sat 20:02 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Generative model of LoRa WAN</title>
+<meta name="author" content="ZSR" />
+<meta name="generator" content="Org Mode" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">Generative model of LoRa WAN</h1>
+<div id="outline-container-orgf98b87d" class="outline-2">
+<h2 id="orgf98b87d"><span class="section-number-2">1.</span> Motivation</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+<b>Cybersecurity Digital Twins and LoRaWAN in the context of Smart-Cities</b>.
+</p>
+
+<p>
+Cybersecurity Digital Twins (CSDTs) are digital representations of connected systems that combine information about assets, configurations, dependencies, and possible attack paths. In the context of the <a href="https://www.mirandaproject.eu/">MIRANDA project</a>, a CSDT is used to model the security posture of complex, heterogeneous, and multi-ownership ICT systems, so that operators can analyse risks, anticipate threats, and support detection and response in a proactive but non-invasive way.
+</p>
+
+<p>
+CSDTs are particularly important in smart cities because urban services rely on many interconnected platforms, devices, and providers, often organised as evolving digital service chains. In such settings, limited visibility across organisational boundaries can make attacks harder to detect and contain, which makes a shared and adaptive security view especially valuable.
+</p>
+
+<p>
+LPWAN stands for <i>Low-Power Wide-Area Network</i>. It refers to wireless technologies designed to connect devices over long distances while keeping energy consumption low. <a href="https://lora-alliance.org/about-lorawan/">LoRaWAN</a> is an open LPWAN protocol for IoT systems that supports bidirectional communication, end-to-end security, mobility, and localisation services over the LoRa physical layer.
+</p>
+
+<p>
+In this setting, LoRaWAN fits at the edge of the smart-city infrastructure, where sensors and actuators collect data from streets, buildings, transport systems, as well as utilities, and forward it to gateways and other services. It therefore forms part of the broader digital service chain that should be observed and protected.
+</p>
+
+<p>
+Here, security can be improved by adding a first layer of defence based on the physical aspects of communication, such as RSSI, SNR, ADR, etc.. These features do not replace other protection mechanism. Instead, they add early context for anomaly detection, device verification, and location-consistency checks, which can help reveal suspicious behaviour before it affects other layers of the system.
+</p>
+</div>
+</div>
+<div id="outline-container-orgb68f60e" class="outline-2">
+<h2 id="orgb68f60e"><span class="section-number-2">2.</span> Description of this work</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+Probabilistic modelling of network traffic can support both anomaly detection and synthetic data generation. Such models can help to identify transmissions that deviate from expected behaviour, while also generating realistic samples for testing monitoring and  components analysis.
+</p>
+
+<p>
+This document presents an exploratory data analysis of the Medellin LoRaWAN dataset and an initial feature-engineering stage, as a preliminary step towards a complete modelling pipeline. The main focus is to refine problem representation.
+</p>
+
+<p>
+The dataset provides a strong basis for our work because as it was collected over four months in a real urban LoRaWAN deployment. The available variables describe several aspects of communication, including timing and device information, geometric and link-budget parameters, transmission settings, environmental conditions, and channel indicators such as RSSI, SNR, and time on air.
+</p>
+</div>
+</div>
+</div>
+</body>
+</html>

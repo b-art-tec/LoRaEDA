@@ -1,0 +1,1133 @@
+#+options: html-style:nil f:nil toc:nil num:t
+#+options: html-postamble:nil
+#+html_head: <meta name="viewport" content="width=device-width, initial-scale=1">
+#+html_head: <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
+#+startup: indent
+#+startup: overview
+#+title:  Generative model of LoRa WAN
+#+author: ZSR
+#+date:   \today
+
+* Python headers                                                   :noexport:
+
+#+begin_src python :eval never-export
+import numpy as np
+import pandas as pd
+
+#+end_src
+
+#+begin_src python :eval never :tangle Introduction.py
+import streamlit as st
+
+
+st.set_page_config(page_title="LoRaWAN EDA", layout="centered")
+#+end_src
+
+#+begin_src python :eval never :tangle pages/1_Motivation.py
+import streamlit as st
+
+
+#+end_src
+
+#+begin_src python :eval never :tangle pages/2_The_dataset.py
+import streamlit as st
+
+import streamlit as st
+import pandas as pd
+import matplotlib.pyplot as plt
+import plotly.express as px
+import numpy as np
+
+
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import FunctionTransformer, LabelEncoder, RobustScaler
+
+#+end_src
+
+#+begin_src python :eval never :tangle pages/3_Overview_of_features.py
+import streamlit as st
+
+
+#+end_src
+
+#+begin_src python :eval never :tangle pages/4_Selected_features.py
+import streamlit as st
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+#+end_src
+
+* Introduction
+
+*Cybersecurity Digital Twins and LoRaWAN in the context of Smart-Cities*.
+
+Cybersecurity Digital Twins (CSDTs) are digital representations of connected systems that combine information about assets, configurations, dependencies, and possible attack paths. In the context of the [[https://www.mirandaproject.eu/][MIRANDA project]], a CSDT is used to model the security posture of complex, heterogeneous, and multi-ownership ICT systems, so that operators can analyse risks, anticipate threats, and support detection and response in a proactive but non-invasive way.
+
+CSDTs are particularly important in smart cities because urban services rely on many interconnected platforms, devices, and providers, often organised as evolving digital service chains. In such settings, limited visibility across organisational boundaries can make attacks harder to detect and contain, which makes a shared and adaptive security view especially valuable.
+
+LPWAN stands for /Low-Power Wide-Area Network/. It refers to wireless technologies designed to connect devices over long distances while keeping energy consumption low. [[https://lora-alliance.org/about-lorawan/][LoRaWAN]] is an open LPWAN protocol for IoT systems that supports bidirectional communication, end-to-end security, mobility, and localisation services over the LoRa physical layer.
+
+In this setting, LoRaWAN fits at the edge of the smart-city infrastructure, where sensors and actuators collect data from streets, buildings, transport systems, as well as utilities, and forward it to gateways and other services. It therefore forms part of the broader digital service chain that should be observed and protected.
+
+Here, security can be improved by adding a first layer of defence based on the physical aspects of communication, such as RSSI, SNR, ADR, etc.. These features do not replace other protection mechanism. Instead, they add early context for anomaly detection, device verification, and location-consistency checks, which can help reveal suspicious behaviour before it affects other layers of the system.
+
+#+begin_src python :eval never :tangle Introduction.py
+st.image("assets/smart_city_baner.png")
+
+motivation = """
+### Cybersecurity Digital Twins and LoRaWAN in the context of Smart-Cities ... 
+
+Cybersecurity Digital Twins (CSDTs) are digital representations of connected systems that combine information about assets, configurations, dependencies, and possible attack paths. In the context of the [MIRANDA project](https://www.mirandaproject.eu/), a CSDT is used to model the security posture of complex, heterogeneous, and multi-ownership ICT systems, so that operators can analyse risks, anticipate threats, and support detection and response in a proactive but non-invasive way.
+
+CSDTs are particularly important in smart cities because urban services rely on many interconnected platforms, devices, and providers, often organised as evolving digital service chains. In such settings, limited visibility across organisational boundaries can make attacks harder to detect and contain, which makes a shared and adaptive security view especially valuable.
+
+LPWAN stands for _Low-Power Wide-Area Network_. It refers to wireless technologies designed to connect devices over long distances while keeping energy consumption low. [LoRaWAN](https://lora-alliance.org/about-lorawan/) is an open LPWAN protocol for IoT systems that supports bidirectional communication, end-to-end security, mobility, and localisation services over the LoRa physical layer.
+
+In this setting, LoRaWAN fits at the edge of the smart-city infrastructure, where sensors and actuators collect data from streets, buildings, transport systems, as well as utilities, and forward it to gateways and other services. It therefore forms part of the broader digital service chain that should be observed and protected.
+
+Here, security can be improved by adding a first layer of defence based on the physical aspects of communication, such as RSSI, SNR, ADR, etc.. These features do not replace other protection mechanism. Instead, they add early context for anomaly detection, device verification, and location-consistency checks, which can help reveal suspicious behaviour before it affects other layers of the system.
+
+"""
+
+st.markdown(motivation)
+#+end_src
+
+* Motivation
+
+Probabilistic modelling of network traffic can support both anomaly detection and synthetic data generation. Such models can help to identify transmissions that deviate from expected behaviour, while also generating realistic samples for testing monitoring and  components analysis.
+
+This document presents an exploratory data analysis of the Medellin LoRaWAN dataset and an initial feature-engineering stage, as a preliminary step towards a complete modelling pipeline. The main focus is to refine problem representation.
+
+The dataset provides a strong basis for our work because as it was collected over four months in a real urban LoRaWAN deployment. The available variables describe several aspects of communication, including timing and device information, geometric and link-budget parameters, transmission settings, environmental conditions, and channel indicators such as RSSI, SNR, and time on air. There are also other features of this dataset, that are important for us, that will be discussed in following sections.
+
+- We go for ML approach -- easy to maintain, flexible, expertise accessible to maintainers.
+- It is a better approach than complex network simulations [cite lora sim. tools].
+- Add illustration of ML.
+
+#+begin_src python :eval never :tangle pages/1_Motivation.py
+st.image("assets/lora_dark.svg")
+
+description = """
+### Motivation.
+
+Probabilistic modelling of network traffic can support both anomaly detection and synthetic data generation. Such models can help to identify transmissions that deviate from expected behaviour, while also generating realistic samples for testing monitoring and  components analysis.
+
+This document presents an exploratory data analysis of the Medellin LoRaWAN dataset and an initial feature-engineering stage, as a preliminary step towards a complete modelling pipeline. The main focus is to refine problem representation.
+
+The dataset provides a strong basis for our work because as it was collected over four months in a real urban LoRaWAN deployment. The available variables describe several aspects of communication, including timing and device information, geometric and link-budget parameters, transmission settings, environmental conditions, and channel indicators such as RSSI, SNR, and time on air. There are also other features of this dataset, that are important for us, that will be discussed in following sections.
+
+
+
+"""
+
+st.markdown(description)
+
+
+col1, col2, col3 = st.columns([1,2,1])
+with col2:
+    st.image("assets/anomaly_dark.svg", width=500)
+
+#+end_src
+
+* The dataset
+:PROPERTIES:
+:header-args: python: :exports none
+:END:
+
+
+In our studies we are using [[https://www.mdpi.com/2306-5729/8/1/4][Medellin]] in Chile -- published at [[https://github.com/magonzalezudem/MDPI_LoRaWAN_Dataset_With_Environmental_Variables][GitHub]]. As with any machine-learning system, model quality is limited by the quality, coverage, and structure of the underlying data. Although the Medellín dataset contains measurements from only four devices, this is precisely what makes it a useful cybersecurity case study. It captures a small, well-characterised LoRaWAN deployment over four months in a real urban setting, together with an unusually rich set of environmental, link-budget, and channel variables. This provides detailed visibility into a realistic maintenance scenario, where some latent factors, such as device configuration, placement, and local shadowing, are only weakly randomised, while other factors, including environmental conditions, are well sampled over time. In modelling terms, this creates a setting in which irreducible variability in the observations coexists with uncertainty caused by limited coverage of devices and configurations, that is, a combination of aleatoric and epistemic uncertainty.
+
+    
+This dataset contains *990,750 LoRaWAN transmission records* collected from multiple End‑Nodes (EN) communicating with a Gateway (GW). Each row corresponds to a single transmission with physical, environmental, and link‑quality measurements.
+
+#+begin_src python :eval never :tangle pages/2_The_dataset.py
+
+st.markdown(r'''
+### The data set
+
+In our studies we are using [Medellin](https://www.mdpi.com/2306-5729/8/1/4) in Chile -- published at [GitHub](https://github.com/magonzalezudem/MDPI_LoRaWAN_Dataset_With_Environmental_Variables). As with any machine-learning system, model quality is limited by the quality, coverage, and structure of the underlying data. Although the Medellín dataset contains measurements from only four devices, this is precisely what makes it a useful cybersecurity case study. It captures a small, well-characterised LoRaWAN deployment over four months in a real urban setting, together with an unusually rich set of environmental, link-budget, and channel variables. This provides detailed visibility into a realistic maintenance scenario, where some latent factors, such as device configuration, placement, and local shadowing, are only weakly randomised, while other factors, including environmental conditions, are well sampled over time. In modelling terms, this creates a setting in which irreducible variability in the observations coexists with uncertainty caused by limited coverage of devices and configurations, that is, a combination of aleatoric and epistemic uncertainty.
+
+''')
+
+#+end_src
+
+#+begin_src python :eval never :tangle pages/2_The_dataset.py
+st.markdown(r'''
+
+### Overview
+Here, we show a snapshot of the complete dataset - as **table** a **pair plot**, and a **correlation heatmap**. Description of all features can be found in a foldable section under the table. Feature selection and engineerig will be presented in another section. 
+
+''')
+
+
+data = pd.read_csv("LoRaWAN Path Loss Measurement Campaign No Outliers V2.csv", index_col=0)
+data = data.drop_duplicates().replace([np.inf, -np.inf], np.nan)
+
+
+st.dataframe(data.head(100))
+st.caption("A snapshot of Medellin dataset.")
+#+end_src
+
+#+begin_src python :eval never :tangle pages/2_The_dataset.py
+data_description = r"""
+This dataset contains **990,750 LoRaWAN transmission records** collected from multiple End-Nodes (EN) communicating with a Gateway (GW). Each row corresponds to a single transmission with physical, environmental, and link-quality measurements.
+
+---
+
+### Row Identification
+- **row_number** -- Sequential index from 1 to 990,750.  
+- **timestamp** -- Date and time of the transmission event.  
+- **device_id** -- Identifier of the End-Node (EN) producing the measurement.
+
+### Physical / Geometric Conditions
+- **distance** -- Distance between EN and GW (m).  
+- **ht** -- EN antenna height above ground (m).  
+- **hr** -- GW antenna height above ground (m).
+
+### Link Budget Parameters
+- **ptx** -- Transmit power of the EN (dBm).  
+- **ltx** -- Transmitter cable & connector losses (dB).  
+- **gtx** -- EN antenna gain (dBi), characterised with a VNA.  
+- **lrx** -- Receiver cable & connector losses at the GW (dB).  
+- **grx** -- GW antenna gain (dBi), characterised with a VNA.  
+- **frequency** -- Carrier frequency (Hz).  
+- **frame_length** -- Payload size of the LoRaWAN frame (bytes).
+
+### Environmental Variables
+- **temperature** -- Air temperature (°C).  
+- **rh** -- Relative humidity (%).  
+- **bp** -- Barometric pressure (hPa).  
+- **pm2_5** -- Particulate matter concentration (µg/m³).
+
+### Received Signal and Quality Indicators
+- **rssi** -- Received Signal Strength Indicator at the GW (dBm).  
+- **snr** -- Signal-to-Noise Ratio (dB).  
+- **toa** -- Time-on-air of the transmission (s).
+
+### Derived Metrics
+- **experimental_pl** -- Experimental path loss:  
+  $$
+  \text{experimental\_pl} = \text{ptx} + \text{gtx} - \text{ltx} + \text{grx} - \text{lrx} - \text{rssi}
+  $$
+- **energy** -- Estimated energy consumed during the transmission (J).
+
+---
+
+**Source repository:**  
+https://github.com/magonzalezudem/MDPI_LoRaWAN_Dataset_With_Environmental_Variables
+"""
+
+with st.expander("Show dataset description (expand/collapse)"):
+    st.markdown(data_description)
+
+#+end_src
+
+#+begin_src python :eval never :tangle pages/2_The_dataset.py
+st.markdown(r'''
+
+To optimise the user experience, we display only 1000 random pairs that can be resampled. We also limit the pool of values to random sub-sample of 10 thousands.
+
+''')
+
+#+end_src
+
+#+begin_src python :eval never :tangle pages/2_The_dataset.py
+log_columns = ["distance", "frequency", "ht", "hr"]
+
+cw_log10 = ColumnTransformer(
+    transformers=[
+        ("log", FunctionTransformer(func=np.log10, inverse_func=lambda x: 10**x, validate=False, feature_names_out="one-to-one"), log_columns),
+    ],
+    remainder="passthrough",
+    verbose_feature_names_out=False
+).set_output(transform="pandas")
+
+# data = cw_log10.fit_transform(data)
+
+encoder = LabelEncoder()
+data["label"] = encoder.fit_transform(data["device_id"])
+
+original_df = data.sample(10_000)
+#+end_src
+
+#+begin_src python :eval never :tangle pages/2_The_dataset.py
+# --------- CONFIG ---------
+COLOR_BY = "device_id"
+# --------------------------
+
+# --- 1. Initialise State ---
+if "original" not in st.session_state:
+    st.session_state.original = original_df.copy()
+    st.session_state.df = st.session_state.original.sample(1000)
+
+if st.button("Resample 1000"):
+    st.session_state.df = st.session_state.original.sample(1000)
+
+df = st.session_state.df
+
+# --- 2. Controls ---
+num_cols = df.select_dtypes(include=["number", "bool"]).columns.tolist()
+if len(num_cols) < 2:
+    st.error("Need at least two numeric columns.")
+    st.stop()
+
+c1, c2 = st.columns(2)
+x_feat = c1.selectbox("Feature X", num_cols, index=15)
+y_feat = c2.selectbox("Feature Y", [c for c in num_cols if c != x_feat], index=15)
+
+# --- 3. Helpers ---
+def build_color_map(df, color_col):
+    palette = px.colors.qualitative.Plotly
+    uniq = sorted(df[color_col].dropna().unique())
+    return {u: palette[i % len(palette)] for i, u in enumerate(uniq)}
+
+
+def ecdf_traces(df, feature, color_col, cmap, legend):
+    out = []
+    for g, sub in df.groupby(color_col):
+        vals = np.sort(sub[feature].dropna().to_numpy())
+        if len(vals) == 0:
+            continue
+        cdf = np.arange(1, len(vals) + 1) / len(vals)
+        out.append(go.Scatter(
+            x=vals,
+            y=cdf,
+            mode="lines",
+            line_shape="hv",
+            line_width=2,
+            name=str(g),
+            marker=dict(color=cmap[g]),
+            showlegend=legend,
+            hovertemplate=(
+                f"{feature}: %{{x}}<br>"
+                f"CDF: %{{y:.3f}}<br>"
+                f"{color_col}: {g}<extra></extra>"
+            ),
+        ))
+    return out
+
+
+def scatter_traces(df, x, y, color_col, cmap, legend):
+    out = []
+    for g, sub in df.groupby(color_col):
+        out.append(go.Scatter(
+            x=sub[x],
+            y=sub[y],
+            mode="markers",
+            marker=dict(size=5, opacity=0.7, color=cmap[g]),
+            name=str(g),
+            showlegend=legend,
+            hovertemplate=(
+                f"{x}: %{{x}}<br>"
+                f"{y}: %{{y}}<br>"
+                f"{color_col}: {g}<extra></extra>"
+            ),
+        ))
+    return out
+
+
+# --- 4. Build Pairplot-style Subplots ---
+fig = make_subplots(
+    rows=2, cols=2,
+    horizontal_spacing=0.12,
+    vertical_spacing=0.12,
+    subplot_titles=[
+        f"CDF: {x_feat}",
+        f"CDF: {y_feat}",
+        f"{y_feat} vs {x_feat}",
+        f"{x_feat} vs {y_feat}"
+    ]
+)
+
+cmap = build_color_map(df, COLOR_BY)
+
+# --- Add traces ---
+# Column 1: X feature
+for tr in ecdf_traces(df, x_feat, COLOR_BY, cmap, legend=True):
+    fig.add_trace(tr, row=1, col=1)
+
+for tr in scatter_traces(df, x_feat, y_feat, COLOR_BY, cmap, legend=False):
+    fig.add_trace(tr, row=2, col=1)
+
+# Column 2: Y feature
+for tr in ecdf_traces(df, y_feat, COLOR_BY, cmap, legend=False):
+    fig.add_trace(tr, row=1, col=2)
+
+for tr in scatter_traces(df, y_feat, x_feat, COLOR_BY, cmap, legend=False):
+    fig.add_trace(tr, row=2, col=2)
+
+
+# --- 5. Axis Linking (correct) ---
+# Column 1: CDF(X) <-> scatter(Y vs X)
+fig.update_layout(xaxis3=dict(matches="x"))
+
+# Column 2: CDF(Y) <-> scatter(X vs Y)
+fig.update_layout(xaxis4=dict(matches="x2"))
+
+# Styling
+fig.update_xaxes(showline=True, linewidth=2, zeroline=False)
+fig.update_yaxes(showline=True, linewidth=2, zeroline=False)
+
+fig.update_layout(
+    height=820,
+    margin=dict(l=50, r=30, t=70, b=50),
+    legend=dict(
+        orientation="h",
+        yanchor="bottom",
+        y=-0.12,
+        xanchor="center",
+        x=0.5
+    )
+)
+
+st.plotly_chart(fig, use_container_width=True)
+st.caption("Pairs and marginals")
+
+#+end_src
+
+#+begin_src python :eval never :tangle pages/2_The_dataset.py
+
+corr = data.select_dtypes(include="number").corr()
+
+fig_corr = go.Figure()
+
+fig_corr.add_trace(
+    go.Heatmap(
+        z=corr.values,
+        x=corr.columns,
+        y=corr.columns,
+        colorscale="RdBu",
+        zmid=0,
+        colorbar=dict(
+            title="corr",
+            thickness=12
+        ),
+        hovertemplate=(
+            "X: %{x}<br>"
+            "Y: %{y}<br>"
+            "Corr: %{z:.3f}<extra></extra>"
+        ),
+    )
+)
+
+fig_corr.update_layout(
+    width=650,
+    height=600,
+    margin=dict(l=40, r=40, t=60, b=40),
+)
+
+fig_corr.update_xaxes(
+    side="top",
+    tickangle=45,
+    showline=True,
+    linewidth=2,
+    mirror=True
+)
+fig_corr.update_yaxes(
+    autorange="reversed",
+    showline=True,
+    linewidth=2,
+    mirror=True
+)
+
+st.plotly_chart(fig_corr, use_container_width=True)
+st.caption("Correlations. Features lacking correlations have only one unique value.")
+#+end_src
+
+
+#+begin_src python :eval never :tangle pages/2_The_dataset.py
+st.markdown(r'''
+
+After short exploration of different pairs we can recognise three main chellenges in modelling of this data:
+- despite large number od samples, many features have limited cardinality (low number of unique values),
+- we have mixed data types: discrete and continuous - at least in principle,
+- there are meaningfull correlation of various degree.
+
+''')
+
+#+end_src
+
+* Data preparation                                                 :noexport:
+:PROPERTIES:
+:header-args: python: :session :eval never-export :results output
+:END:
+
+This will be a common section that loads and prepares for other sections.
+
+* Overview of features 
+
+# Template - to be deleted 
+#+begin_comment
+1. Feature selection paradigm.
+   - This is a story of what we include in the final training set, what will be modified and what can be dropped.
+   - In other words, we have to decide what will be will considered as a representation of the network state, at least certain aspects of the state.
+   - By network state we understand any abstraction of training data that allows us to distinguish between legitimate traffic and anomalies.
+   - As mentioned before, we are focusing on the analysis of physical and hardware aspect of the communication, such as RSSI and SNR, frequency, SF. Therefore, the state could be any function of frame/gateway metadata.
+   - We imagine that, if for example an impostor will joint the network, the new device, being in unusual location, will have unusual signature, say relationship between declared coordinates and RSS -- signature that is a transformation of various features we decide to include.
+   - These features -- frame/gateway metadata --  in the context of LoRa are coded in the payload. Hence, designers/engineers have an option to include many important of the communication, and with the current dataset we have a lot to choose from.
+   - However, we need to stay with things that are commonly used.
+   - For example, it’s rather unlikely that humidity will be included in the system design, so potential influence on RSS should be rather taken account implicitly through uncertainty rather than explicitly modelled. On the other hand SNR should be included explicitly. 
+   - With this dataset, we have many features to choose from to build a representative model of a network. More precisely, a model of metadata generated by a network. 
+   - The best way to approach this challenge is to start with key property that will pull, on some sense, all the features we need, which also we can later augment.
+
+2. The strategy
+   - We start with the assertion, that simplest useful digital twin will have certain ability to predict network modifications. The most straightforward way to do it, is to expand it by adding another end device with the same hardware at a new location.
+   - What will be affected? Signal propagation of course. So we need to include distance, RSSI and SNR as well, since by definition
+     $$ SNR = RSSI - P_n $$
+     Where P_n is the noise power. For readers that are more ML focused, we remind that we are working here in logarithmic scales so rations proportions are represented by differences and sums.
+   - Will other features also be important? Let's consider propagation models [cite].
+   - In the simplest case, the commonly used propagation model is log-distance path-loss
+     $$ <<LLM:write log-distance path loss as latex>>
+#+end_comment
+
+In this section we focus on feature selection and engineering,  i.e. what we will include the final training set, what will be modified, and what can be dropped. In other words, we need to decide what will count as a representation of the network state, or at least of those aspects of the state that matter for detection. By network state, we mean an abstraction of the available data that allows us to distinguish legitimate traffic from anomalies.
+
+Here, we focus on the physical and hardware aspects of communication, so the state may be taken as a function of frame and gateway metadata, such as RSSI, SNR, frequency, or spreading factor. However, bare in mind that within MIRANDA and development of cyber-security digital twins this is only part of the challenge. The idea is that, if an impostor joins the network, the new device, being in an unusual location, may leave an unusual signature in the relation between the features we choose to include -- for example between declared coordinates and received signal strength. In LoRaWAN, many of these features are encoded in the metadata attached to transmissions, so the designer has plenty of freedom in choosing what aspect of the network will be modified.
+
+The goal here is in some sense optimal selection. We probably want to avoid redundant features or ones that will rarely available in the context of a CS digital twin. In other words, we need a sufficient minimal representation of the network state (sentence to improve).
+
+*Features related to propagation*
+
+The current dataset is useful in this respect because it provides a rich set of timing, link-budget, environmental, and channel variables from a real deployment, which gives us many possible starting points for a representative model. At the same time, we should stay with quantities that are commonly used in practice. For example, quantities such as RSSI and SNR should be included explicitly, while some environmental conditions, such as humidity, are better treated implicitly, through uncertainty (unless they are part of the deployed system). A sensible way to approach this challenge is to start with key property that will pull, in some sense, all the features we need, which also we can later augment.
+
+We start with the assertion, that simplest useful digital twin will have certain ability to predict network modifications. The most straightforward way to do it, is to expand it by adding another end device, of known hardware, at a new location. Therefore distance must enter the state description, together with RSSI. By definition,
+
+$$
+\mathrm{SNR} = \mathrm{RSSI} - P_n,
+$$
+
+where $$P_n$$ is the noise power. Therefore, by including also SNR we will improve our representation. For readers that are more ML focused, we remind that we are working here in logarithmic scales so rations proportions are represented by differences and sums. Let us investigate this through a propagation model. A standard choice is the log-distance path-loss model,
+
+$$
+\def \PL {\mathrm{PL}}
+\PL(d) = \PL(d_0) + 10 n \log_{10} \left( \frac{d}{d_0} \right) + X_\sigma,
+$$
+
+where $\mathrm{PL}(d_0)$ is the path loss at a reference distance $$d_0$$, $$n$$ is the path-loss exponent, $d$ is the distance between transmitter and receiver, and $$X_\sigma$$ is a shadowing term, often $X_\sigma \sim \mathcal{N}(0, \sigma)$. So it seems that this segment of features is complete. We will expand on in a moment. First, we introduce the first element of feature engineering.
+
+*Feature engineering.*
+
+It follows that the most convenient way to represent distance is on a logarithmic scale. This is consistent with the propagation models introduced above. Also, when we later derive the expected path loss, it may be more convenient, at least for prediction, to work with expected or estimated noise power rather than with SNR itself. In the context of this research, most of the features is in optimal representations simple because industry standards are already optimised for clarity and simplicity. For example, SNR and RSSI are almost always given in dB or dBm units.
+
+*Contextual parameter -- propagation*
+
+Will other features matter as well? Let us consider the more advanced urban Okumura--Hata model
+
+$$
+\mathrm{PL}(\ldots) = A + B \log_{10}(f_c) - C \log_{10}(h_b) - a(h_m) + \left(D - E \log_{10}(h_b)\right)\log_{10}(d),
+$$
+
+where $$f_c$$ is the carrier frequency, $$h_b$$ is the base-station antenna height, and $$h_m$$ is the end-device antenna height. The correction term $$a(h_m)$$ accounts for the receiver antenna height and, in practice, depends on the urban setting. Capital letters represent to be estimated. In qualitative terms, the model says that path loss grows with distance and frequency, while higher antennas placements reduces it.
+
+These quantities are important considerations. It would therefore be tempting to include all of these parameters in the dataset. However, such information is not usually available. Universal generative model for LoRaWAN logs should be confined to carefully crafted set of features that ensures the model remains transferable across deployments (while still capturing the essential information necessary for robust testing and anomaly detection). It is therefore better to treat it as a bias term in the path loss, and as one source of epistemic uncertainty.
+
+Frequency, on the other hand, appears in the model and is often reported. One could argue that, because the adaptive range is narrow, its main effect is again a bias term. Should it then be included explicitely? On the ground of satisfying propagation model, probably not, at least not in the context of this dataset. On the other hand, there are other important considerations.
+
+Even in the absence of a full time-series model for frequency, the marginal distribution of channel occupancy may capture features of the local radio environment, offering a potentially useful signal fingerprinting. For instance, when channel activity detection (CAD) and adaptive channel masking are enabled, the empirical under utilisation of specific frequnecies can serve as an indicator of protocol compliance, helping to distinguish between legitimate and anomalous nodes.
+
+*ADR policy, link budget, payload and data-rate*
+
+We can apply a very similar reasoning to other features as well. One of the key parameters governing the efficiency and robustness of a LoRa link is the spreading factor (SF).
+
+When ADR is enabled, the network may adapt the spreading factor on the basis of recent link-quality measurements, typically using an SNR-derived margin over recent uplinks. In that sense, SF may contribute to a radio or location fingerprint, although it is not its deterministic identifier. An attempt to impersonate a legitimate device from a different location may induce an anomalous tuple (SF, SNR, RSSI), particularly when the legitimate device operates under stable conditions.
+
+Other factors related to propagation affecting transmission quality, such as antenna gains and environmental conditions, are often unavailable in operational datasets. In the absence of explicit measurements, these factors may be absorbed into latent terms affecting the bias and variance of the observable radio metrics, in the same manner as was previously done for parameters such as antenna height.
+
+The next consideration concerns the characterisation of the payload. While the analysis of payload content belongs to other layers of the digital twin, payload size may itself constitute an informative feature for anomaly detection.
+
+Likewise, quantities related to the data rate may also be relevant. The nominal LoRa physical-layer bit rate is given by
+$$
+\text{R}_b = \text{SF} \left( \frac{4}{4 + \text{CR}} \right)\frac{\text{BW} \times 10^3}{2^{\text{SF}}},
+$$
+where $\text{R}_b$ denotes the nominal LoRa data rate in $\text{b} \, \text{s}^{-1}$, \(\text{SF}\) is the spreading factor, $\text{CR} \in \{1,2,3,4\}$ is the coding-rate parameter, and $\text{BW}$ is the signal bandwidth expressed in kHz. The factor $10^3$ converts the bandwidth from kHz to Hz so that $\text{R}_b$ is obtained in bits per second. Equivalently, the term $\text{BW}/2^{\text{SF}}$ represents the symbol rate, while $4/(4 + \text{CR})$ accounts for the reduction in effective information rate due to forward error correction.
+
+These parameters, when considered together with time-on-air (ToA), may provide a coarse surrogate for payload-related behaviour when frame length is unavailable. However, their more direct value lies in checking consistency with the configured data-rate profile, bandwidth selection, and ADR behaviour of the network. Therefore, whenever available, these variables should also be included in the feature set.
+
+
+| Feature        | Symbol               | Description                                                                                         |
+| -------------- | -------------------: | --------------------------------------------------------------------------------------------------- |
+| =timestamp=      | $t$                  | Measurement time (used for temporal context/splitting and drift).                                   |
+| =device_id=      | $\mathrm{id}$        | End-node identifier (captures per-device fingerprints and fixed deployment differences).            |
+| =distance=       | $d$                  | EN–GW separation in metres (primary geometric driver of propagation/path loss).                     |
+| =frequency=      | $f$                  | Carrier frequency (contextual PHY parameter; can shift propagation and channel conditions).         |
+| =frame_length=   | $l_{\text{frame}}$   | Payload size in bytes (behaviour/policy proxy without inspecting payload content).                  |
+| =rssi=           | $\mathrm{RSSI}$      | Received signal strength at the gateway in dBm (core observable of link power).                     |
+| =snr=            | $\mathrm{SNR}$       | Signal-to-noise ratio in dB (core observable of channel quality).                                   |
+| =toa=            | $\mathrm{ToA}$       | Time-on-air in seconds (captures airtime regime and potential policy violations).                   |
+| =sf=             | $\mathrm{SF}$        | Spreading factor (ADR-relevant parameter; relates to coverage/airtime trade-offs and fingerprints). |
+
+
+#+begin_src python :eval never :tangle pages/3_Overview_of_features.py
+
+st.set_page_config(
+    page_title="Feature selection",
+    layout="centered",
+)
+
+st.title("Feature selection")
+
+st.markdown(r'''
+
+- ```TODO``` improve justification for propagation parameters by addressing dependance on frequency as soon as we introduce the propagation model
+
+### The rationale
+
+In this section we focus on feature selection and engineering,  i.e. what we will include in the final training set, what will be modified, and what can be dropped. In other words, we need to decide what will count as a representation of the network state, or at least of those aspects of the state that matter for detection. By network state, we mean an abstraction of the available data that allows us to distinguish legitimate traffic from anomalies.
+
+
+**The paradgim**
+
+Here, we focus on the physical and hardware aspects of communication, so the state may be taken as a function of frame and gateway metadata, such as RSSI, SNR, frequency, or spreading factor. However, bare in mind that within MIRANDA and development of cyber-security digital twins this is only part of the challenge. The idea is that, if an impostor joins the network, the new device, being in an unusual location, may leave an unusual signature in the relation between the features we choose to include -- for example between declared coordinates and received signal strength. In LoRaWAN, many of these features are encoded in the metadata attached to transmissions, so the designer has plenty of freedom in choosing what aspect of the network will be modified.
+
+
+**The strategy**
+
+The current dataset is useful in this respect because it provides a rich set of timing, link-budget, environmental, and channel variables from a real deployment, which gives us many possible starting points for a representative model. At the same time, we should stay with quantities that are commonly used in practice. For example, quantities such as RSSI and SNR should be included explicitly, while some environmental conditions, such as humidity, are better treated implicitly, through uncertainty (unless they are part of the deployed system). A sensible way to approach this challenge is to start with key property that will pull, in some sense, all the features we need, which also we can later augment.
+
+
+**Features related to propagation**
+
+We start with the assertion, that simplest useful digital twin will have certain ability to predict network modifications. The most straightforward way to do it, is to expand it by adding another end device, of known hardware, at a new location. Therefore distance must enter the state description, together with RSSI. By definition,
+$$
+\mathrm{SNR} = \mathrm{RSSI} - P_n,
+$$
+where $$P_n$$ is the noise power. Therefore, by including also SNR we will improve our representation. For readers that are more ML focused, we remind that we are working here in logarithmic scales so rations proportions are represented by differences and sums.
+
+Will other features matter as well? Let us investigate this through a propagation model. A standard choice is the log-distance path-loss model,
+$$
+\def \PL {\mathrm{PL}}
+\PL(d) = \PL(d_0) + 10 n \log_{10} \left( \frac{d}{d_0} \right) + X_\sigma,
+$$
+where $\mathrm{PL}(d_0)$ is the path loss at a reference distance $$d_0$$, $$n$$ is the path-loss exponent, $d$ is the distance between transmitter and receiver, and $$X_\sigma$$ is a shadowing term, often $X_\sigma \sim \mathcal{N}(0, \sigma)$. So it seems that this segment of features is complete. We will expand on this later.
+
+
+**Feature engineering.**
+
+It follows that the most convenient way to represent distance is on a logarithmic scale. This is consistent with the propagation models introduced above. Also, when we later derive the expected path loss, it may be more convenient, at least for prediction, to work with expected or estimated noise power rather than with SNR itself. In the context of this research, most of the features is in optimal representations simple because industry standards are already optimised for clarity and simplicity. For example, SNR and RSSI are almost always given in dB or dBm units.
+
+**Contextual parameters**
+
+Will other features matter as well? Let us consider the more advanced urban Okumura--Hata model
+
+$$
+\mathrm{PL}(\ldots) = A + B \log_{10}(f_c) - C \log_{10}(h_b) - a(h_m) + \left(D - E \log_{10}(h_b)\right)\log_{10}(d),
+$$
+
+where $$f_c$$ is the carrier frequency, $$h_b$$ is the base-station antenna height, and $$h_m$$ is the end-device antenna height. The correction term $$a(h_m)$$ accounts for the receiver antenna height and, in practice, depends on the urban setting. Capital letters represent to be estimated. In qualitative terms, the model says that path loss grows with distance and frequency, while higher antennas placements reduces it.
+
+These are important considerations. It would therefore be tempting to include these parameters in the dataset.
+
+However, such information is not usually available as part of the metadata. It is therefore better to treat it as a bias term in the path loss, and as one source of epistemic uncertainty. Frequency, on the other hand, appears in the model and is often reported. One could argue that, because the adaptive range is narrow, its main effect is again a bias term. Should it then be included? On the ground of satisfying propagation model, probably not, at least not in the context of this dataset. However, there are other reasons to include this aspect of communication.
+
+**ADR policy and other features**
+
+We can apply a very similar reasoning to other features as well. One of the key parameters defining the efficiency of a LoRa link is the spreading factor (SF). When adaptive data rate (ADR) is enabled, SF is usually adjusted according to the recent history of SNR, and as such, can be part of the location fingerprint. Any attempt to spoof a legitimate device and to communicate from another location, might result in anomalous relationship between SF, SNR and RSSI. 
+
+With regard to other features related to transmission quality, such as detailed link-budget components (for example, transmission power and antenna gains) and environmental conditions, these are also typically unavailable. Accordingly, they should be treated as latent factors affecting the bias and variance of the observable radio metrics, in the same manner as was previously done for parameters such as antenna height.
+
+The next consideration is related to the characterisation of the payload. While the analysis of its content belong to other layers of the digital twin, its volume might be an important feature allowing to detect anomalies.
+
+Subsequently, quantities related to the data rate are also very relevant. The data rate is given by
+$$
+\text{R}_b = \text{SF} \left( \frac{4}{4 + \text{CR}} \right)\frac{\text{BW} \times 10^3}{2^{\text{SF}}},
+$$
+
+where $\text{R}_b$ denotes the nominal LoRa data rate in bit s$^{-1}$, $\text{SF}$ is the spreading factor, $\text{CR} \in \{1,2,3,4\}$ is the coding-rate parameter, and $\text{BW}$ is the signal bandwidth expressed in kHz. The factor $10^3$ converts the bandwidth from kHz to Hz so that $\text{R}_b$ is obtained in bits per second. Equivalently, the term $\text{BW}/2^{\text{SF}}$ represents the symbol rate, while $4/(4 + \text{CR})$ accounts for the reduction in effective information rate due to forward error correction.
+
+While these parameters combined with time-on-air (ToA) provide indication of the payload, more importantly they also provide some level of verification if link adheres to the network policies. Therefore, if available they should also be a part of the feature set.
+
+### Final training set (QoI)
+
+Based on these considerations, we selected the following set of features.
+
+| Feature        |               Symbol | Description                                                                                         |
+| -------------- | -------------------: | --------------------------------------------------------------------------------------------------- |
+| `timestamp`    |                $$t$$ | Measurement time (used for temporal context/splitting and drift).                                   |
+| `device_id`    |      $$\mathrm{id}$$ | End-node identifier (captures per-device fingerprints and fixed deployment differences).            |
+| `distance`     |                $$d$$ | EN–GW separation in metres (primary geometric driver of propagation/path loss).                     |
+| `frequency`    |                $$f$$ | Carrier frequency (contextual PHY parameter; can shift propagation and channel conditions).         |
+| `frame_length` | $$l_{\text{frame}}$$ | Payload size in bytes (behaviour/policy proxy without inspecting payload content).                  |
+| `rssi`         |    $$\mathrm{RSSI}$$ | Received signal strength at the gateway in dBm (core observable of link power).                     |
+| `snr`          |     $$\mathrm{SNR}$$ | Signal-to-noise ratio in dB (core observable of channel quality).                                   |
+| `toa`          |     $$\mathrm{ToA}$$ | Time-on-air in seconds (captures airtime regime and potential policy violations).                   |
+| `sf`           |      $$\mathrm{SF}$$ | Spreading factor (ADR-relevant parameter; relates to coverage/airtime trade-offs and fingerprints). |
+
+
+''')
+
+#+end_src
+
+* Prediction                                                       :noexport:
+
+At the end, prediction will go to a separate file
+
+ - What slider we can change?
+ - Check equations ...
+ - Definitely we can change distance.
+ - In principle frequency, but that wont be so useful for anomaly detection and uncertainty is too high for network planning (scope of energy consumption)
+ - We could also change geometric conditions, like antenna height.
+ - However, this is essentially changing path-loss. For now, we will provide simple path loss model, base on distance, but we will keep in mind that there are other options.
+ - The big problem -- we have some epistemic uncertainty here, could be interfering ... delay transition of features.
+
+What sliders we will use -- path loss -- payload -- will define on final features.
+
+* The dataset
+
+- Here, we show the data set
+
+
+#+begin_src python :eval never :tangle pages/4_Selected_features.py
+import numpy as np
+import pandas as pd
+import plotly.graph_objects as go
+import plotly.express as px
+import streamlit as st
+from plotly.subplots import make_subplots
+import plotly.express as px
+
+
+#+end_src
+
+
+#+begin_src python :eval never :tangle pages/4_Selected_features.py
+
+st.set_page_config(
+    page_title="The dataset",
+    layout="centered",
+)
+
+st.title("The dataset")
+
+#+end_src
+
+
+#+begin_src python :eval never :tangle no
+# pages/4_Selected_features.py
+
+st.set_page_config(layout="centered")
+
+st.markdown(
+    """
+    <style>
+    .block-container {
+        max-width: 1000px;
+        padding-left: 2rem;
+        padding-right: 2rem;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+st.title("The dataset")
+#+end_src
+
+
+#+begin_src python :eval never :tangle pages/4_Selected_features.py
+
+# Data
+# ====
+
+data = pd.read_csv(
+    "LoRaWAN Path Loss Measurement Campaign No Outliers V2.csv",
+    index_col=0,
+)
+data = data.drop_duplicates().replace([np.inf, -np.inf], np.nan)
+
+qoi = ["timestamp", "device_id", "distance", "frequency", "frame_length", "rssi", "snr", "toa", "sf"]
+df = data.sample(10_000, random_state=42).loc[:, qoi]
+
+numeric_cols = df.select_dtypes(include=[np.number]).columns.tolist()
+GROUP_COL = "device_id"
+order_by = "alphabetical"
+
+#+end_src
+
+#+begin_src python :eval never :tangle pages/4_Selected_features.py
+
+# Sidebar — ONLY continuous tuning controls
+# =========================================
+with st.sidebar:
+    st.header("Plot tuning")
+
+    value_col = st.selectbox(
+    "Feature",
+    numeric_cols,
+    index=numeric_cols.index("rssi") if "rssi" in numeric_cols else 0,
+    )
+    
+    max_points = st.slider(
+        "Max points per device (for KDE + rain)",
+        50, 1500, 500, 50,
+    )
+
+    x_spread = st.slider(
+        "Rain X-axis spread",
+        0.01, 0.20, 0.05, 0.01,
+        help="Horizontal dispersion of sampled points (kept non-overlapping)",
+    )
+
+    fig_height = st.slider(
+        "Figure height",
+        500, 1100, 720, 20,
+    )
+
+#+end_src
+
+#+begin_src python :eval never :tangle pages/4_Selected_features.py
+
+# Utilities
+# =========
+
+def to_rgba(color: str, alpha: float) -> str:
+    if color.startswith("rgb"):
+        return color.replace("rgb", "rgba").replace(")", f", {alpha})")
+    c = color.lstrip("#")
+    r, g, b = int(c[0:2], 16), int(c[2:4], 16), int(c[4:6], 16)
+    return f"rgba({r},{g},{b},{alpha})"
+
+
+def downsample(x: np.ndarray, max_n: int, rng: np.random.Generator) -> np.ndarray:
+    if len(x) <= max_n:
+        return x
+    return x[rng.choice(len(x), size=max_n, replace=False)]
+
+def build_color_map(df, color_col):
+    palette = px.colors.qualitative.Plotly
+    uniq = sorted(df[color_col].dropna().unique())
+    return {u: palette[i % len(palette)] for i, u in enumerate(uniq)}
+
+#+end_src
+
+#+begin_src python :eval never :tangle pages/4_Selected_features.py
+
+# Plotting functions
+# ==================
+
+def raincloud_plot(df: pd.DataFrame) -> go.Figure:
+
+    plot_df = df[[GROUP_COL, value_col]].dropna()
+    grouped = plot_df.groupby(GROUP_COL)[value_col]
+
+    if order_by == "median":
+        devices = grouped.median().sort_values().index.tolist()
+    elif order_by == "mean":
+        devices = grouped.mean().sort_values().index.tolist()
+    else:
+        devices = sorted(plot_df[GROUP_COL].astype(str).unique())
+
+    xs = np.arange(len(devices), dtype=float)
+    x_map = dict(zip(devices, xs))
+
+    palette = px.colors.qualitative.Safe
+    colors = {d: palette[i % len(palette)] for i, d in enumerate(devices)}
+
+    fig = go.Figure()
+    rng = np.random.default_rng(123)
+
+    # semantic order: data → box → KDE
+    DATA_OFFSET = -0.20
+    BOX_OFFSET  =  0.00
+    KDE_OFFSET  = +0.15
+
+    for d in devices:
+        y = plot_df.loc[plot_df[GROUP_COL] == d, value_col].to_numpy()
+        if len(y) == 0:
+            continue
+
+        y_ds = downsample(y, max_points, rng)
+        x0 = x_map[d]
+        col = colors[d]
+
+        # raw data
+        fig.add_trace(
+            go.Scatter(
+                x=x0 + DATA_OFFSET + rng.uniform(-x_spread, x_spread, size=len(y_ds)),
+                y=y_ds,
+                mode="markers",
+                marker=dict(
+                    size=4,
+                    color=to_rgba(col, 0.55),
+                    line=dict(width=0.3, color=to_rgba(col, 0.85)),
+                ),
+                showlegend=False,
+            )
+        )
+
+        # box plot (narrow, reference)
+        fig.add_trace(
+            go.Box(
+                x=np.full(len(y_ds), x0 + BOX_OFFSET),
+                y=y_ds,
+                width=0.15,
+                boxpoints=False,
+                quartilemethod="linear",
+                line=dict(color=col, width=1.4),
+                fillcolor=to_rgba(col, 0.18),
+                marker_color=col,
+                showlegend=False,
+            )
+        )
+
+        # KDE (from downsample only)
+        fig.add_trace(
+            go.Violin(
+                x=np.full(len(y_ds), x0 + KDE_OFFSET),
+                y=y_ds,
+                side="positive",
+                width=0.55,
+                scalegroup="all",
+                points=False,
+                spanmode="hard",
+                line=dict(color=col, width=1.2),
+                fillcolor=to_rgba(col, 0.35),
+                showlegend=False,
+            )
+        )
+
+    fig.update_layout(
+        height=fig_height,
+        violingap=0,
+        violinmode="overlay",
+        boxmode="overlay",
+        # title=dict(
+        #     text=f"{value_col} by device_id",
+        #     x=0.01,
+        #     xanchor="left",
+        # ),
+        xaxis=dict(
+            title="device_id",
+            tickmode="array",
+            tickvals=xs.tolist(),
+            ticktext=[str(d) for d in devices],
+            range=[-0.9, len(devices) - 0.1],
+            showgrid=False,
+        ),
+        yaxis=dict(
+            title=value_col,
+            showgrid=True,
+        ),
+    )
+
+    return fig
+
+
+#+end_src
+
+#+begin_src python :eval never :tangle pages/4_Selected_features.py
+
+#+end_src
+
+#+begin_src python :eval never :tangle pages/4_Selected_features.py
+def marginal_cdf_plot(df, feature, group_col):
+    cmap = build_color_map(df, group_col)
+    fig = go.Figure()
+
+    for g, sub in df.groupby(group_col):
+        vals = np.sort(sub[feature].dropna().to_numpy())
+        if len(vals) == 0:
+            continue
+
+        cdf = np.arange(1, len(vals) + 1) / len(vals)
+
+        fig.add_trace(
+            go.Scatter(
+                x=vals,
+                y=cdf,
+                mode="lines",
+                line_shape="hv",
+                line_width=2,
+                name=str(g),
+                marker_color=cmap[g],
+                hovertemplate=(
+                    f"{group_col}: {g}<br>"
+                    f"{feature}: %{{x:.2f}}<br>"
+                    f"CDF: %{{y:.3f}}"
+                ),
+            )
+        )
+
+    fig.update_xaxes(showline=True, linewidth=2, zeroline=False)
+    fig.update_yaxes(showline=True, linewidth=2, zeroline=False)
+
+    fig.update_layout(
+        height=420,
+        margin=dict(l=60, r=30, t=60, b=50),
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=-0.25,
+            xanchor="center",
+            x=0.5,
+        ),
+    )
+
+    return fig
+
+
+#+end_src
+
+#+begin_src python :eval never :tangle pages/4_Selected_features.py
+def feature_vs_distance_plot(df, feature, group_col, dist_col="distance"):
+    cmap = build_color_map(df, group_col)
+    fig = go.Figure()
+
+    for g, sub in df.groupby(group_col):
+        fig.add_trace(
+            go.Scatter(
+                x=sub[dist_col],
+                y=sub[feature],
+                mode="markers",
+                marker=dict(size=5, opacity=0.7, color=cmap[g]),
+                name=str(g),
+                hovertemplate=(
+                    f"{group_col}: {g}<br>"
+                    f"{dist_col}: %{{x:.1f}}<br>"
+                    f"{feature}: %{{y:.2f}}"
+                ),
+            )
+        )
+
+    fig.update_xaxes(
+        title="distance [m]",
+        showline=True,
+        linewidth=2,
+        zeroline=False,
+    )
+    fig.update_yaxes(
+        title=feature,
+        showline=True,
+        linewidth=2,
+        zeroline=False,
+    )
+
+    fig.update_layout(
+        height=420,
+        margin=dict(l=60, r=30, t=60, b=50),
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=-0.25,
+            xanchor="center",
+            x=0.5,
+        ),
+    )
+
+    return fig
+
+
+#+end_src
+
+#+begin_src python :eval never :tangle pages/4_Selected_features.py
+def feature_vs_time_plot(df, feature, group_col, time_col="timestamp"):
+    # ensure datetime conversion (non-destructive)
+    t = pd.to_datetime(df[time_col], errors="coerce")
+    dff = df.copy()
+    dff[time_col] = t
+
+    cmap = build_color_map(dff, group_col)
+    fig = go.Figure()
+
+    for g, sub in dff.groupby(group_col):
+        fig.add_trace(
+            go.Scatter(
+                x=sub[time_col],
+                y=sub[feature],
+                mode="markers",
+                marker=dict(
+                    size=4,
+                    opacity=0.6,
+                    color=cmap[g],
+                ),
+                name=str(g),
+                hovertemplate=(
+                    f"{group_col}: {g}<br>"
+                    f"time: %{{x|%Y-%m-%d %H:%M:%S}}<br>"
+                    f"{feature}: %{{y:.2f}}"
+                ),
+            )
+        )
+
+    fig.update_xaxes(
+        title="time",
+        showline=True,
+        linewidth=2,
+        zeroline=False,
+    )
+    fig.update_yaxes(
+        title=feature,
+        showline=True,
+        linewidth=2,
+        zeroline=False,
+    )
+
+    fig.update_layout(
+        height=420,
+        margin=dict(l=60, r=30, t=60, b=50),
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=-0.25,
+            xanchor="center",
+            x=0.5,
+        ),
+    )
+
+    return fig
+#+end_src
+
+#+begin_src python :eval never :tangle pages/4_Selected_features.py
+
+
+
+st.markdown(r'''
+As described in the previous section, we define the training set as the tuple
+
+$$x = (t, \mathrm{id}, d, f, l_{\text{frame}}, \mathrm{RSSI}, \mathrm{SNR}, \mathrm{ToA}, \mathrm{SF})$$
+
+Here, one can explore every selected feature, its per-device distribution, and dependence on two key varaibles -- relative distance and time.
+
+''')
+
+st.markdown(r'''
+### Raincloud plots
+One of the best way to decribe 
+''')
+
+
+fig = raincloud_plot(df)
+st.plotly_chart(fig, use_container_width=True)
+
+st.markdown(r'''
+Let $\mathbf{X}=(X_1,\dots,X_d)$ be a random vector. The *marginal* CDF of component $X_i$ is
+
+$$
+F_{X_i}(x) \, = \, \mathrm{P}(X_i \le x).
+$$
+
+In some sense it is the CDF of $X_i$ alone, i.e. the joint distribution with all other coordinates “ignored”.
+''')
+
+st.plotly_chart(
+    marginal_cdf_plot(df, value_col, GROUP_COL),
+    use_container_width=True,
+)
+
+
+st.plotly_chart(
+    feature_vs_distance_plot(df, value_col, GROUP_COL),
+    use_container_width=True,
+
+)
+
+
+st.plotly_chart(
+    feature_vs_time_plot(df, value_col, GROUP_COL),
+    use_container_width=True,
+)
+
+#+end_src
