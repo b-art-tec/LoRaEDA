@@ -253,18 +253,29 @@ def heatmap_fig(mat: pd.DataFrame, title: str, abs_values: bool = False) -> go.F
 
 
 def top_edges(mat: pd.DataFrame, k: int) -> pd.DataFrame:
-    """Return top-k absolute relationships excluding diagonal."""
-    m = mat.copy()
-    np.fill_diagonal(m.values, np.nan)
-    pairs = []
-    cols = list(m.columns)
-    for i in range(len(cols)):
-        for j in range(i + 1, len(cols)):
-            v = m.iloc[i, j]
-            if pd.notna(v):
-                pairs.append((cols[i], cols[j], float(v), float(abs(v))))
-    out = pd.DataFrame(pairs, columns=["var_1", "var_2", "value", "abs_value"])
+    """Return top-k absolute relationships excluding diagonal (no in-place writes)."""
+    arr = mat.to_numpy(copy=False)  # copy not needed because we won't modify it
+    cols = list(mat.columns)
+
+    # upper triangle indices without diagonal
+    iu = np.triu_indices_from(arr, k=1)
+
+    vals = arr[iu]
+    out = pd.DataFrame(
+        {
+            "var_1": [cols[i] for i in iu[0]],
+            "var_2": [cols[j] for j in iu[1]],
+            "value": vals,
+        }
+    )
+
+    # Drop NaNs (can occur if a column is constant/invalid after filtering)
+    out = out.dropna(subset=["value"])
+
+    # Sort by absolute value and return top-k
+    out["abs_value"] = out["value"].abs()
     out = out.sort_values("abs_value", ascending=False).head(k).drop(columns=["abs_value"])
+
     return out.reset_index(drop=True)
 
 
