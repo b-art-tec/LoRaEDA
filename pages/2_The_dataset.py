@@ -28,7 +28,7 @@ Here, we show a snapshot of the complete dataset - as **table** a **pair plot**,
 ''')
 
 
-data = pd.read_csv("LoRaWAN Path Loss Measurement Campaign No Outliers V2.csv", index_col=0)
+data = pd.read_csv("LoRaWAN Path Loss Measurement Campaign No Outliers V2.csv.gz", index_col=0)
 data = data.drop_duplicates().replace([np.inf, -np.inf], np.nan)
 
 

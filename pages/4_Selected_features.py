@@ -21,10 +21,8 @@ st.title("The dataset")
 # Data
 # ====
 
-data = pd.read_csv(
-    "LoRaWAN Path Loss Measurement Campaign No Outliers V2.csv",
-    index_col=0,
-)
+data = pd.read_csv("LoRaWAN Path Loss Measurement Campaign No Outliers V2.csv.gz", index_col=0)
+
 data = data.drop_duplicates().replace([np.inf, -np.inf], np.nan)
 
 qoi = ["timestamp", "device_id", "distance", "frequency", "frame_length", "rssi", "snr", "toa", "sf"]
