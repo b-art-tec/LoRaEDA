@@ -1718,7 +1718,7 @@ def pair_matrix_2x2_fig(
     # Traces
     for i, (g, sub) in enumerate(dff.groupby(color_col)):
         col = cmap[g]
-        showleg = (i == 0)
+        showleg = True # (i == 0)
 
         vx = sub[x].to_numpy()
         vy = sub[y].to_numpy()
@@ -1734,6 +1734,7 @@ def pair_matrix_2x2_fig(
         # Off-diagonal scatters
         fig.add_trace(scatter_trace(sub[x], sub[y], str(g), col, showlegend=False, hx=x, hy=y), row=1, col=2)
         fig.add_trace(scatter_trace(sub[y], sub[x], str(g), col, showlegend=False, hx=y, hy=x), row=2, col=1)
+
 
     # Styling
     fig.update_xaxes(showline=True, linewidth=2, zeroline=False)
