@@ -371,6 +371,7 @@ def ks_heatmap(df: pd.DataFrame, feature: str, group_col: str, max_points: int) 
                 else:
                     ks_mat[i, j] = ks_2samp(s1, s2).statistic
 
+    text = np.round(ks_mat, decimals=2)
     fig = go.Figure(data=go.Heatmap(
         z=ks_mat,
         x=devices,
@@ -380,6 +381,8 @@ def ks_heatmap(df: pd.DataFrame, feature: str, group_col: str, max_points: int) 
         colorbar=dict(title="KS statistic", thickness=15),
         xgap=6,
         ygap=6,
+        text=text,
+        texttemplate="%{text:.2f}",
         hovertemplate="Device %{x} vs %{y}<br>KS = %{z:.3f}<extra></extra>"
     ))
     fig.update_layout(
@@ -387,8 +390,8 @@ def ks_heatmap(df: pd.DataFrame, feature: str, group_col: str, max_points: int) 
         # title=f"Pairwise KS statistic - {feature}",
         xaxis_showgrid=False,
         yaxis_showgrid=False,
-        xaxis_title="Device",
-        yaxis_title="Device",
+        xaxis_title="device",
+        yaxis_title="device",
         margin=dict(l=60, r=30, t=60, b=50)
     )
     return fig
