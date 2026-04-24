@@ -171,6 +171,7 @@ def raincloud_plot(df: pd.DataFrame) -> go.Figure:
         violingap=0,
         violinmode="overlay",
         boxmode="overlay",
+        margin=dict(l=60, r=30, t=30, b=50),
         # title=dict(
         #     text=f"{value_col} by device_id",
         #     x=0.01,
@@ -343,37 +344,50 @@ def feature_vs_time_plot(df, feature, group_col, time_col="timestamp"):
     return fig
 
 st.markdown(r'''
-As described in the previous section, We define the training set as the tuple
+As described in the previous section, we define the training set as the tuple
 
 $$x = (t, \mathrm{id}, d, f, l_{\text{frame}}, \mathrm{RSSI}, \mathrm{SNR}, \mathrm{ToA}, \mathrm{SF})$$
 
-Here, one can explore every selected feature, its per-device distribution, and dependence on two key varaibles -- relative distance and time.
+**Here, one can explore every selected feature, its per-device distribution, and dependence on two key variables -- relative distance and time.** You can select the feature and control its visualisation with widgets on the side panel.
+
+- ```NOTE``` Here, we exclude TX and RX gains and losses. They will be important in later stages, and are part of the training set. However, we will test the generative model on data, as they are give. Once we will proceed to predictive maintenance, gains and losses will be important in the estimation, or analysis, of the path loss.
+- Here, we mention above quantities as they are important to understand certain anomalies in the data.
+- One of the key quantities that can be used in predictive maintenance is consistency of features, mainly link quality measures, with established/historical local radio environment.
+- While time dependence might be crucial in detection of anomalous behaviour, below we can see that the nature of this dataset will not allow us to use it as basis for anomaly detection.
 
 ''')
 
 st.markdown(r'''
 ### Raincloud plots
-One of the best way to decribe 
+One of the best ways to visualise distributions, esepcailly conditional on a group label, is to use so-called raincloud plots. Such plot combines a probability density estimate, location and spread (box-plot), and the individual observations in a single coherent figure. More about this can be found in later sections, below visualisations.
 ''')
-
 
 fig = raincloud_plot(df)
 st.plotly_chart(fig, use_container_width=True)
 
 st.markdown(r'''
-Let $\mathbf{X}=(X_1,\dots,X_d)$ be a random vector. The *marginal* CDF of component $X_i$ is
+### Marginal distributions
+
+Distribution of each feature could also be represented by marginal cumulative distribution function --- CDF. As a reminder, consider a random vector $\mathbf{X}=(X_1,\dots,X_d)$. Then the empirical CDF of the component $X_i$ is given by
 
 $$
 F_{X_i}(x) \, = \, \mathrm{P}(X_i \le x).
 $$
 
-In some sense it is the CDF of $X_i$ alone, i.e. the joint distribution with all other coordinates “ignored”.
+In some sense, marginal CDF is a distribution of a single feature taken from a sample of a multivariate vector.
 ''')
 
 st.plotly_chart(
     marginal_cdf_plot(df, value_col, GROUP_COL),
     use_container_width=True,
 )
+
+st.markdown(r'''
+### Dependence on distance and time
+
+**Relative distance**
+
+''')
 
 
 st.plotly_chart(
@@ -382,8 +396,42 @@ st.plotly_chart(
 
 )
 
+st.markdown(r'''
+- ```NOTE``` In the case of EN3 features related to propagation like RSSI and SNR seem anomalous. Analysis of all qunatities (see The dataset panel) reveals that this device has unusually large cabel losses.
+
+''')
+
+
+
+st.markdown(r'''
+**Dependance on time**
+''')
+
 
 st.plotly_chart(
     feature_vs_time_plot(df, value_col, GROUP_COL),
     use_container_width=True,
 )
+
+st.markdown(r'''
+
+### What exactly is rainclooud plot?
+
+Formally, let $$\{x_i\}_{i=1}^n$$ be a sample of a univariate random variable $$X$$. A raincloud plot consists of three aligned components:
+
+1.  **Density (cloud)**  
+    A smoothed estimate of the probability density function
+    $$
+    \hat{f}(x) = \frac{1}{n h} \sum_{i=1}^{n} K\!\left(\frac{x - x_i}{h}\right),
+    $$
+    where $$K$$ is a kernel (typically Gaussian) and $$h$$ is the bandwidth.
+
+2.  **Summary statistics (box or bar)**  
+    Typically the median and interquartile range, providing a robust summary of location and spread.
+
+3.  **Raw observations (rain)**  
+    Individual data points displayed with slight jitter to reveal sample size, clustering, and multimodality.
+
+By combining these elements, the raincloud plot enables simultaneous assessment of **distributional structure**, **between-group differences**, and **within-group variability**, making it particularly well suited for exploratory data analysis and groupwise comparisons.
+
+''')

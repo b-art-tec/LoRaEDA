@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2026-03-21 Sat 20:02 -->
+<!-- 2026-04-23 Thu 13:25 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Generative model of LoRa WAN</title>
@@ -11,12 +11,44 @@
 <meta name="generator" content="Org Mode" />
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
+<script>
+  window.MathJax = {
+    tex: {
+      ams: {
+        multlineWidth: '85%'
+      },
+      tags: 'ams',
+      tagSide: 'right',
+      tagIndent: '.8em'
+    },
+    chtml: {
+      scale: 1.0,
+      displayAlign: 'center',
+      displayIndent: '0em'
+    },
+    svg: {
+      scale: 1.0,
+      displayAlign: 'center',
+      displayIndent: '0em'
+    },
+    output: {
+      font: 'mathjax-modern',
+      displayOverflow: 'overflow'
+    }
+  };
+</script>
+
+<script
+  id="MathJax-script"
+  async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
 </head>
 <body>
 <div id="content" class="content">
 <h1 class="title">Generative model of LoRa WAN</h1>
-<div id="outline-container-orgf98b87d" class="outline-2">
-<h2 id="orgf98b87d"><span class="section-number-2">1.</span> Motivation</h2>
+<div id="outline-container-orgdc88c41" class="outline-2">
+<h2 id="orgdc88c41"><span class="section-number-2">1.</span> Introduction</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 <b>Cybersecurity Digital Twins and LoRaWAN in the context of Smart-Cities</b>.
@@ -41,10 +73,32 @@ In this setting, LoRaWAN fits at the edge of the smart-city infrastructure, wher
 <p>
 Here, security can be improved by adding a first layer of defence based on the physical aspects of communication, such as RSSI, SNR, ADR, etc.. These features do not replace other protection mechanism. Instead, they add early context for anomaly detection, device verification, and location-consistency checks, which can help reveal suspicious behaviour before it affects other layers of the system.
 </p>
+
+<div class="org-src-container">
+<pre class="src src-python"><code>st.image(<span style="color: #98be65;">"assets/smart_city_baner.png"</span>)
+
+<span style="color: #dcaeea;">motivation</span> <span style="color: #51afef;">=</span> <span style="color: #98be65;">"""
+### Cybersecurity Digital Twins and LoRaWAN in the context of Smart-Cities ... 
+
+Cybersecurity Digital Twins (CSDTs) are digital representations of connected systems that combine information about assets, configurations, dependencies, and possible attack paths. In the context of the [MIRANDA project](https://www.mirandaproject.eu/), a CSDT is used to model the security posture of complex, heterogeneous, and multi-ownership ICT systems, so that operators can analyse risks, anticipate threats, and support detection and response in a proactive but non-invasive way.
+
+CSDTs are particularly important in smart cities because urban services rely on many interconnected platforms, devices, and providers, often organised as evolving digital service chains. In such settings, limited visibility across organisational boundaries can make attacks harder to detect and contain, which makes a shared and adaptive security view especially valuable.
+
+LPWAN stands for _Low-Power Wide-Area Network_. It refers to wireless technologies designed to connect devices over long distances while keeping energy consumption low. [LoRaWAN](https://lora-alliance.org/about-lorawan/) is an open LPWAN protocol for IoT systems that supports bidirectional communication, end-to-end security, mobility, and localisation services over the LoRa physical layer.
+
+In this setting, LoRaWAN fits at the edge of the smart-city infrastructure, where sensors and actuators collect data from streets, buildings, transport systems, as well as utilities, and forward it to gateways and other services. It therefore forms part of the broader digital service chain that should be observed and protected.
+
+Here, security can be improved by adding a first layer of defence based on the physical aspects of communication, such as RSSI, SNR, ADR, etc.. These features do not replace other protection mechanism. Instead, they add early context for anomaly detection, device verification, and location-consistency checks, which can help reveal suspicious behaviour before it affects other layers of the system.
+
+"""</span>
+
+st.markdown(motivation)
+</code></pre>
 </div>
 </div>
-<div id="outline-container-orgb68f60e" class="outline-2">
-<h2 id="orgb68f60e"><span class="section-number-2">2.</span> Description of this work</h2>
+</div>
+<div id="outline-container-orgdb1808c" class="outline-2">
+<h2 id="orgdb1808c"><span class="section-number-2">2.</span> Motivation</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 Probabilistic modelling of network traffic can support both anomaly detection and synthetic data generation. Such models can help to identify transmissions that deviate from expected behaviour, while also generating realistic samples for testing monitoring and  components analysis.
@@ -55,8 +109,827 @@ This document presents an exploratory data analysis of the Medellin LoRaWAN data
 </p>
 
 <p>
-The dataset provides a strong basis for our work because as it was collected over four months in a real urban LoRaWAN deployment. The available variables describe several aspects of communication, including timing and device information, geometric and link-budget parameters, transmission settings, environmental conditions, and channel indicators such as RSSI, SNR, and time on air.
+The dataset provides a strong basis for our work because as it was collected over four months in a real urban LoRaWAN deployment. The available variables describe several aspects of communication, including timing and device information, geometric and link-budget parameters, transmission settings, environmental conditions, and channel indicators such as RSSI, SNR, and time on air. There are also other features of this dataset, that are important for us, that will be discussed in following sections.
 </p>
+
+<ul class="org-ul">
+<li>We go for ML approach &ndash; easy to maintain, flexible, expertise accessible to maintainers.</li>
+<li>It is a better approach than complex network simulations [cite lora sim. tools].</li>
+<li>Add illustration of ML.</li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-python"><code>st.image(<span style="color: #98be65;">"assets/lora_dark.svg"</span>)
+
+<span style="color: #dcaeea;">description</span> <span style="color: #51afef;">=</span> <span style="color: #98be65;">"""
+### Motivation.
+
+Probabilistic modelling of network traffic can support both anomaly detection and synthetic data generation. Such models can help to identify transmissions that deviate from expected behaviour, while also generating realistic samples for testing monitoring and  components analysis.
+
+This document presents an exploratory data analysis of the Medellin LoRaWAN dataset and an initial feature-engineering stage, as a preliminary step towards a complete modelling pipeline. The main focus is to refine problem representation.
+
+The dataset provides a strong basis for our work because as it was collected over four months in a real urban LoRaWAN deployment. The available variables describe several aspects of communication, including timing and device information, geometric and link-budget parameters, transmission settings, environmental conditions, and channel indicators such as RSSI, SNR, and time on air. There are also other features of this dataset, that are important for us, that will be discussed in following sections.
+
+
+
+"""</span>
+
+st.markdown(description)
+
+
+<span style="color: #dcaeea;">col1</span>, <span style="color: #dcaeea;">col2</span>, <span style="color: #dcaeea;">col3</span> <span style="color: #51afef;">=</span> st.columns([1,2,1])
+<span style="color: #51afef;">with</span> col2:
+    st.image(<span style="color: #98be65;">"assets/anomaly_dark.svg"</span>, width<span style="color: #51afef;">=</span>500)
+
+</code></pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org8ca5014" class="outline-2">
+<h2 id="org8ca5014"><span class="section-number-2">3.</span> The dataset</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+In our studies we are using <a href="https://www.mdpi.com/2306-5729/8/1/4">Medellin</a> in Chile &ndash; published at <a href="https://github.com/magonzalezudem/MDPI_LoRaWAN_Dataset_With_Environmental_Variables">GitHub</a>. As with any machine-learning system, model quality is limited by the quality, coverage, and structure of the underlying data. Although the Medellín dataset contains measurements from only four devices, this is precisely what makes it a useful cybersecurity case study. It captures a small, well-characterised LoRaWAN deployment over four months in a real urban setting, together with an unusually rich set of environmental, link-budget, and channel variables. This provides detailed visibility into a realistic maintenance scenario, where some latent factors, such as device configuration, placement, and local shadowing, are only weakly randomised, while other factors, including environmental conditions, are well sampled over time. In modelling terms, this creates a setting in which irreducible variability in the observations coexists with uncertainty caused by limited coverage of devices and configurations, that is, a combination of aleatoric and epistemic uncertainty.
+</p>
+
+
+<p>
+This dataset contains <b>990,750 LoRaWAN transmission records</b> collected from multiple End‑Nodes (EN) communicating with a Gateway (GW). Each row corresponds to a single transmission with physical, environmental, and link‑quality measurements.
+</p>
+</div>
+</div>
+<div id="outline-container-org57b8614" class="outline-2">
+<h2 id="org57b8614"><span class="section-number-2">4.</span> Overview of features</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+In this section we focus on feature selection and engineering,  i.e. what we will include the final training set, what will be modified, and what can be dropped. In other words, we need to decide what will count as a representation of the network state, or at least of those aspects of the state that matter for detection. By network state, we mean an abstraction of the available data that allows us to distinguish legitimate traffic from anomalies.
+</p>
+
+<p>
+Here, we focus on the physical and hardware aspects of communication, so the state may be taken as a function of frame and gateway metadata, such as RSSI, SNR, frequency, or spreading factor. However, bare in mind that within MIRANDA and development of cyber-security digital twins this is only part of the challenge. The idea is that, if an impostor joins the network, the new device, being in an unusual location, may leave an unusual signature in the relation between the features we choose to include &ndash; for example between declared coordinates and received signal strength. In LoRaWAN, many of these features are encoded in the metadata attached to transmissions, so the designer has plenty of freedom in choosing what aspect of the network will be modified.
+</p>
+
+<p>
+The goal here is in some sense optimal selection. We probably want to avoid redundant features or ones that will rarely available in the context of a CS digital twin. In other words, we need a sufficient minimal representation of the network state (sentence to improve).
+</p>
+
+<p>
+<b>Features related to propagation</b>
+</p>
+
+<p>
+The current dataset is useful in this respect because it provides a rich set of timing, link-budget, environmental, and channel variables from a real deployment, which gives us many possible starting points for a representative model. At the same time, we should stay with quantities that are commonly used in practice. For example, quantities such as RSSI and SNR should be included explicitly, while some environmental conditions, such as humidity, are better treated implicitly, through uncertainty (unless they are part of the deployed system). A sensible way to approach this challenge is to start with key property that will pull, in some sense, all the features we need, which also we can later augment.
+</p>
+
+<p>
+We start with the assertion, that simplest useful digital twin will have certain ability to predict network modifications. The most straightforward way to do it, is to expand it by adding another end device, of known hardware, at a new location. Therefore distance must enter the state description, together with RSSI. By definition,
+</p>
+
+<p>
+\[
+\mathrm{SNR} = \mathrm{RSSI} - P_n,
+\]
+</p>
+
+<p>
+where \[P_n\] is the noise power. Therefore, by including also SNR we will improve our representation. For readers that are more ML focused, we remind that we are working here in logarithmic scales so rations proportions are represented by differences and sums. Let us investigate this through a propagation model. A standard choice is the log-distance path-loss model,
+</p>
+
+<p>
+\[
+\def \PL {\mathrm{PL}}
+\PL(d) = \PL(d_0) + 10 n \log_{10} \left( \frac{d}{d_0} \right) + X_\sigma,
+\]
+</p>
+
+<p>
+where \(\mathrm{PL}(d_0)\) is the path loss at a reference distance \[d_0\], \[n\] is the path-loss exponent, \(d\) is the distance between transmitter and receiver, and \[X_\sigma\] is a shadowing term, often \(X_\sigma \sim \mathcal{N}(0, \sigma)\). So it seems that this segment of features is complete. We will expand on in a moment. First, we introduce the first element of feature engineering.
+</p>
+
+<p>
+<b>Feature engineering.</b>
+</p>
+
+<p>
+It follows that the most convenient way to represent distance is on a logarithmic scale. This is consistent with the propagation models introduced above. Also, when we later derive the expected path loss, it may be more convenient, at least for prediction, to work with expected or estimated noise power rather than with SNR itself. In the context of this research, most of the features is in optimal representations simple because industry standards are already optimised for clarity and simplicity. For example, SNR and RSSI are almost always given in dB or dBm units.
+</p>
+
+<p>
+<b>Contextual parameter &ndash; propagation</b>
+</p>
+
+<p>
+Will other features matter as well? Let us consider the more advanced urban Okumura&ndash;Hata model
+</p>
+
+<p>
+\[
+\mathrm{PL}(\ldots) = A + B \log_{10}(f_c) - C \log_{10}(h_b) - a(h_m) + \left(D - E \log_{10}(h_b)\right)\log_{10}(d),
+\]
+</p>
+
+<p>
+where \[f_c\] is the carrier frequency, \[h_b\] is the base-station antenna height, and \[h_m\] is the end-device antenna height. The correction term \[a(h_m)\] accounts for the receiver antenna height and, in practice, depends on the urban setting. Capital letters represent to be estimated. In qualitative terms, the model says that path loss grows with distance and frequency, while higher antennas placements reduces it.
+</p>
+
+<p>
+These quantities are important considerations. It would therefore be tempting to include all of these parameters in the dataset. However, such information is not usually available. Universal generative model for LoRaWAN logs should be confined to carefully crafted set of features that ensures the model remains transferable across deployments (while still capturing the essential information necessary for robust testing and anomaly detection). It is therefore better to treat it as a bias term in the path loss, and as one source of epistemic uncertainty.
+</p>
+
+<p>
+Frequency, on the other hand, appears in the model and is often reported. One could argue that, because the adaptive range is narrow, its main effect is again a bias term. Should it then be included explicitely? On the ground of satisfying propagation model, probably not, at least not in the context of this dataset. On the other hand, there are other important considerations.
+</p>
+
+<p>
+Even in the absence of a full time-series model for frequency, the marginal distribution of channel occupancy may capture features of the local radio environment, offering a potentially useful signal fingerprinting. For instance, when channel activity detection (CAD) and adaptive channel masking are enabled, the empirical under utilisation of specific frequnecies can serve as an indicator of protocol compliance, helping to distinguish between legitimate and anomalous nodes.
+</p>
+
+<p>
+<b>ADR policy, link budget, payload and data-rate</b>
+</p>
+
+<p>
+We can apply a very similar reasoning to other features as well. One of the key parameters governing the efficiency and robustness of a LoRa link is the spreading factor (SF).
+</p>
+
+<p>
+When ADR is enabled, the network may adapt the spreading factor on the basis of recent link-quality measurements, typically using an SNR-derived margin over recent uplinks. In that sense, SF may contribute to a radio or location fingerprint, although it is not its deterministic identifier. An attempt to impersonate a legitimate device from a different location may induce an anomalous tuple (SF, SNR, RSSI), particularly when the legitimate device operates under stable conditions.
+</p>
+
+<p>
+Other factors related to propagation affecting transmission quality, such as antenna gains and environmental conditions, are often unavailable in operational datasets. In the absence of explicit measurements, these factors may be absorbed into latent terms affecting the bias and variance of the observable radio metrics, in the same manner as was previously done for parameters such as antenna height.
+</p>
+
+<p>
+The next consideration concerns the characterisation of the payload. While the analysis of payload content belongs to other layers of the digital twin, payload size may itself constitute an informative feature for anomaly detection.
+</p>
+
+<p>
+Likewise, quantities related to the data rate may also be relevant. The nominal LoRa physical-layer bit rate is given by
+\[
+\text{R}_b = \text{SF} \left( \frac{4}{4 + \text{CR}} \right)\frac{\text{BW} \times 10^3}{2^{\text{SF}}},
+\]
+where \(\text{R}_b\) denotes the nominal LoRa data rate in \(\text{b} \, \text{s}^{-1}\), \(\text{SF}\) is the spreading factor, \(\text{CR} \in \{1,2,3,4\}\) is the coding-rate parameter, and \(\text{BW}\) is the signal bandwidth expressed in kHz. The factor \(10^3\) converts the bandwidth from kHz to Hz so that \(\text{R}_b\) is obtained in bits per second. Equivalently, the term \(\text{BW}/2^{\text{SF}}\) represents the symbol rate, while \(4/(4 + \text{CR})\) accounts for the reduction in effective information rate due to forward error correction.
+</p>
+
+<p>
+These parameters, when considered together with time-on-air (ToA), may provide a coarse surrogate for payload-related behaviour when frame length is unavailable. However, their more direct value lies in checking consistency with the configured data-rate profile, bandwidth selection, and ADR behaviour of the network. Therefore, whenever available, these variables should also be included in the feature set.
+</p>
+
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">Feature</td>
+<td class="org-left">Symbol</td>
+<td class="org-left">Description</td>
+</tr>
+
+<tr>
+<td class="org-left">--------------</td>
+<td class="org-left">--------------&ndash;&mdash;:</td>
+<td class="org-left">---------------------------------------------------------------------------------------------------</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>timestamp</code></td>
+<td class="org-left">\(t\)</td>
+<td class="org-left">Measurement time (used for temporal context/splitting and drift).</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>device_id</code></td>
+<td class="org-left">\(\mathrm{id}\)</td>
+<td class="org-left">End-node identifier (captures per-device fingerprints and fixed deployment differences).</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>distance</code></td>
+<td class="org-left">\(d\)</td>
+<td class="org-left">EN–GW separation in metres (primary geometric driver of propagation/path loss).</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>frequency</code></td>
+<td class="org-left">\(f\)</td>
+<td class="org-left">Carrier frequency (contextual PHY parameter; can shift propagation and channel conditions).</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>frame_length</code></td>
+<td class="org-left">\(l_{\text{frame}}\)</td>
+<td class="org-left">Payload size in bytes (behaviour/policy proxy without inspecting payload content).</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>rssi</code></td>
+<td class="org-left">\(\mathrm{RSSI}\)</td>
+<td class="org-left">Received signal strength at the gateway in dBm (core observable of link power).</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>snr</code></td>
+<td class="org-left">\(\mathrm{SNR}\)</td>
+<td class="org-left">Signal-to-noise ratio in dB (core observable of channel quality).</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>toa</code></td>
+<td class="org-left">\(\mathrm{ToA}\)</td>
+<td class="org-left">Time-on-air in seconds (captures airtime regime and potential policy violations).</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>sf</code></td>
+<td class="org-left">\(\mathrm{SF}\)</td>
+<td class="org-left">Spreading factor (ADR-relevant parameter; relates to coverage/airtime trade-offs and fingerprints).</td>
+</tr>
+</tbody>
+</table>
+
+
+<div class="org-src-container">
+<pre class="src src-python"><code>
+st.set_page_config(
+    page_title<span style="color: #51afef;">=</span><span style="color: #98be65;">"Feature selection"</span>,
+    layout<span style="color: #51afef;">=</span><span style="color: #98be65;">"centered"</span>,
+)
+
+st.title(<span style="color: #98be65;">"Feature selection"</span>)
+
+st.markdown(r<span style="color: #98be65;">'''
+
+- ```TODO``` improve justification for propagation parameters by addressing dependance on frequency as soon as we introduce the propagation model
+
+### The rationale
+
+In this section we focus on feature selection and engineering,  i.e. what we will include in the final training set, what will be modified, and what can be dropped. In other words, we need to decide what will count as a representation of the network state, or at least of those aspects of the state that matter for detection. By network state, we mean an abstraction of the available data that allows us to distinguish legitimate traffic from anomalies.
+
+
+**The paradgim**
+
+Here, we focus on the physical and hardware aspects of communication, so the state may be taken as a function of frame and gateway metadata, such as RSSI, SNR, frequency, or spreading factor. However, bare in mind that within MIRANDA and development of cyber-security digital twins this is only part of the challenge. The idea is that, if an impostor joins the network, the new device, being in an unusual location, may leave an unusual signature in the relation between the features we choose to include -- for example between declared coordinates and received signal strength. In LoRaWAN, many of these features are encoded in the metadata attached to transmissions, so the designer has plenty of freedom in choosing what aspect of the network will be modified.
+
+
+**The strategy**
+
+The current dataset is useful in this respect because it provides a rich set of timing, link-budget, environmental, and channel variables from a real deployment, which gives us many possible starting points for a representative model. At the same time, we should stay with quantities that are commonly used in practice. For example, quantities such as RSSI and SNR should be included explicitly, while some environmental conditions, such as humidity, are better treated implicitly, through uncertainty (unless they are part of the deployed system). A sensible way to approach this challenge is to start with key property that will pull, in some sense, all the features we need, which also we can later augment.
+
+
+**Features related to propagation**
+
+We start with the assertion, that simplest useful digital twin will have certain ability to predict network modifications. The most straightforward way to do it, is to expand it by adding another end device, of known hardware, at a new location. Therefore distance must enter the state description, together with RSSI. By definition,
+$$
+\mathrm{SNR} = \mathrm{RSSI} - P_n,
+$$
+where $$P_n$$ is the noise power. Therefore, by including also SNR we will improve our representation. For readers that are more ML focused, we remind that we are working here in logarithmic scales so rations proportions are represented by differences and sums.
+
+Will other features matter as well? Let us investigate this through a propagation model. A standard choice is the log-distance path-loss model,
+$$
+\def \PL {\mathrm{PL}}
+\PL(d) = \PL(d_0) + 10 n \log_{10} \left( \frac{d}{d_0} \right) + X_\sigma,
+$$
+where $\mathrm{PL}(d_0)$ is the path loss at a reference distance $$d_0$$, $$n$$ is the path-loss exponent, $d$ is the distance between transmitter and receiver, and $$X_\sigma$$ is a shadowing term, often $X_\sigma \sim \mathcal{N}(0, \sigma)$. So it seems that this segment of features is complete. We will expand on this later.
+
+
+**Feature engineering.**
+
+It follows that the most convenient way to represent distance is on a logarithmic scale. This is consistent with the propagation models introduced above. Also, when we later derive the expected path loss, it may be more convenient, at least for prediction, to work with expected or estimated noise power rather than with SNR itself. In the context of this research, most of the features is in optimal representations simple because industry standards are already optimised for clarity and simplicity. For example, SNR and RSSI are almost always given in dB or dBm units.
+
+**Contextual parameters**
+
+Will other features matter as well? Let us consider the more advanced urban Okumura--Hata model
+
+$$
+\mathrm{PL}(\ldots) = A + B \log_{10}(f_c) - C \log_{10}(h_b) - a(h_m) + \left(D - E \log_{10}(h_b)\right)\log_{10}(d),
+$$
+
+where $$f_c$$ is the carrier frequency, $$h_b$$ is the base-station antenna height, and $$h_m$$ is the end-device antenna height. The correction term $$a(h_m)$$ accounts for the receiver antenna height and, in practice, depends on the urban setting. Capital letters represent to be estimated. In qualitative terms, the model says that path loss grows with distance and frequency, while higher antennas placements reduces it.
+
+These are important considerations. It would therefore be tempting to include these parameters in the dataset.
+
+However, such information is not usually available as part of the metadata. It is therefore better to treat it as a bias term in the path loss, and as one source of epistemic uncertainty. Frequency, on the other hand, appears in the model and is often reported. One could argue that, because the adaptive range is narrow, its main effect is again a bias term. Should it then be included? On the ground of satisfying propagation model, probably not, at least not in the context of this dataset. However, there are other reasons to include this aspect of communication.
+
+**ADR policy and other features**
+
+We can apply a very similar reasoning to other features as well. One of the key parameters defining the efficiency of a LoRa link is the spreading factor (SF). When adaptive data rate (ADR) is enabled, SF is usually adjusted according to the recent history of SNR, and as such, can be part of the location fingerprint. Any attempt to spoof a legitimate device and to communicate from another location, might result in anomalous relationship between SF, SNR and RSSI. 
+
+With regard to other features related to transmission quality, such as detailed link-budget components (for example, transmission power and antenna gains) and environmental conditions, these are also typically unavailable. Accordingly, they should be treated as latent factors affecting the bias and variance of the observable radio metrics, in the same manner as was previously done for parameters such as antenna height.
+
+The next consideration is related to the characterisation of the payload. While the analysis of its content belong to other layers of the digital twin, its volume might be an important feature allowing to detect anomalies.
+
+Subsequently, quantities related to the data rate are also very relevant. The data rate is given by
+$$
+\text{R}_b = \text{SF} \left( \frac{4}{4 + \text{CR}} \right)\frac{\text{BW} \times 10^3}{2^{\text{SF}}},
+$$
+
+where $\text{R}_b$ denotes the nominal LoRa data rate in bit s$^{-1}$, $\text{SF}$ is the spreading factor, $\text{CR} \in \{1,2,3,4\}$ is the coding-rate parameter, and $\text{BW}$ is the signal bandwidth expressed in kHz. The factor $10^3$ converts the bandwidth from kHz to Hz so that $\text{R}_b$ is obtained in bits per second. Equivalently, the term $\text{BW}/2^{\text{SF}}$ represents the symbol rate, while $4/(4 + \text{CR})$ accounts for the reduction in effective information rate due to forward error correction.
+
+While these parameters combined with time-on-air (ToA) provide indication of the payload, more importantly they also provide some level of verification if link adheres to the network policies. Therefore, if available they should also be a part of the feature set.
+
+### Final training set (QoI)
+
+Based on these considerations, we selected the following set of features.
+
+| Feature        |               Symbol | Description                                                                                         |
+| -------------- | -------------------: | --------------------------------------------------------------------------------------------------- |
+| `timestamp`    |                $$t$$ | Measurement time (used for temporal context/splitting and drift).                                   |
+| `device_id`    |      $$\mathrm{id}$$ | End-node identifier (captures per-device fingerprints and fixed deployment differences).            |
+| `distance`     |                $$d$$ | EN&#8211;GW separation in metres (primary geometric driver of propagation/path loss).                     |
+| `frequency`    |                $$f$$ | Carrier frequency (contextual PHY parameter; can shift propagation and channel conditions).         |
+| `frame_length` | $$l_{\text{frame}}$$ | Payload size in bytes (behaviour/policy proxy without inspecting payload content).                  |
+| `rssi`         |    $$\mathrm{RSSI}$$ | Received signal strength at the gateway in dBm (core observable of link power).                     |
+| `snr`          |     $$\mathrm{SNR}$$ | Signal-to-noise ratio in dB (core observable of channel quality).                                   |
+| `toa`          |     $$\mathrm{ToA}$$ | Time-on-air in seconds (captures airtime regime and potential policy violations).                   |
+| `sf`           |      $$\mathrm{SF}$$ | Spreading factor (ADR-relevant parameter; relates to coverage/airtime trade-offs and fingerprints). |
+
+
+'''</span>)
+
+</code></pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org496224e" class="outline-2">
+<h2 id="org496224e"><span class="section-number-2">5.</span> The dataset</h2>
+<div class="outline-text-2" id="text-5">
+<ul class="org-ul">
+<li>Here, we show the data set</li>
+</ul>
+
+
+<div class="org-src-container">
+<pre class="src src-python"><code><span style="color: #51afef;">import</span> numpy <span style="color: #51afef;">as</span> np
+<span style="color: #51afef;">import</span> pandas <span style="color: #51afef;">as</span> pd
+<span style="color: #51afef;">import</span> plotly.graph_objects <span style="color: #51afef;">as</span> go
+<span style="color: #51afef;">import</span> plotly.express <span style="color: #51afef;">as</span> px
+<span style="color: #51afef;">import</span> streamlit <span style="color: #51afef;">as</span> st
+<span style="color: #51afef;">from</span> plotly.subplots <span style="color: #51afef;">import</span> make_subplots
+<span style="color: #51afef;">import</span> plotly.express <span style="color: #51afef;">as</span> px
+
+
+</code></pre>
+</div>
+
+
+<div class="org-src-container">
+<pre class="src src-python"><code>
+st.set_page_config(
+    page_title<span style="color: #51afef;">=</span><span style="color: #98be65;">"The dataset"</span>,
+    layout<span style="color: #51afef;">=</span><span style="color: #98be65;">"centered"</span>,
+)
+
+st.title(<span style="color: #98be65;">"The dataset"</span>)
+
+</code></pre>
+</div>
+
+
+<div class="org-src-container">
+<pre class="src src-python"><code><span style="color: #5B6268;"># </span><span style="color: #5B6268;">pages/4_Selected_features.py
+</span>
+st.set_page_config(layout<span style="color: #51afef;">=</span><span style="color: #98be65;">"centered"</span>)
+
+st.markdown(
+    <span style="color: #98be65;">"""
+    &lt;style&gt;
+    .block-container {
+        max-width: 1000px;
+        padding-left: 2rem;
+        padding-right: 2rem;
+    }
+    &lt;/style&gt;
+    """</span>,
+    unsafe_allow_html<span style="color: #51afef;">=</span><span style="color: #a9a1e1;">True</span>,
+)
+
+st.title(<span style="color: #98be65;">"The dataset"</span>)
+</code></pre>
+</div>
+
+
+<div class="org-src-container">
+<pre class="src src-python"><code>
+<span style="color: #5B6268;"># </span><span style="color: #5B6268;">Data
+</span><span style="color: #5B6268;"># </span><span style="color: #5B6268;">====
+</span>
+<span style="color: #dcaeea;">data</span> <span style="color: #51afef;">=</span> pd.read_csv(
+    <span style="color: #98be65;">"LoRaWAN Path Loss Measurement Campaign No Outliers V2.csv"</span>,
+    index_col<span style="color: #51afef;">=</span>0,
+)
+<span style="color: #dcaeea;">data</span> <span style="color: #51afef;">=</span> data.drop_duplicates().replace([np.inf, <span style="color: #51afef;">-</span>np.inf], np.nan)
+
+<span style="color: #dcaeea;">qoi</span> <span style="color: #51afef;">=</span> [<span style="color: #98be65;">"timestamp"</span>, <span style="color: #98be65;">"device_id"</span>, <span style="color: #98be65;">"distance"</span>, <span style="color: #98be65;">"frequency"</span>, <span style="color: #98be65;">"frame_length"</span>, <span style="color: #98be65;">"rssi"</span>, <span style="color: #98be65;">"snr"</span>, <span style="color: #98be65;">"toa"</span>, <span style="color: #98be65;">"sf"</span>]
+<span style="color: #dcaeea;">df</span> <span style="color: #51afef;">=</span> data.sample(10_000, random_state<span style="color: #51afef;">=</span>42).loc[:, qoi]
+
+<span style="color: #dcaeea;">numeric_cols</span> <span style="color: #51afef;">=</span> df.select_dtypes(include<span style="color: #51afef;">=</span>[np.number]).columns.tolist()
+<span style="color: #dcaeea;">GROUP_COL</span> <span style="color: #51afef;">=</span> <span style="color: #98be65;">"device_id"</span>
+<span style="color: #dcaeea;">order_by</span> <span style="color: #51afef;">=</span> <span style="color: #98be65;">"alphabetical"</span>
+
+</code></pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-python"><code>
+<span style="color: #5B6268;"># </span><span style="color: #5B6268;">Sidebar &#8212; ONLY continuous tuning controls
+</span><span style="color: #5B6268;"># </span><span style="color: #5B6268;">=========================================
+</span><span style="color: #51afef;">with</span> st.sidebar:
+    st.header(<span style="color: #98be65;">"Plot tuning"</span>)
+
+    <span style="color: #dcaeea;">value_col</span> <span style="color: #51afef;">=</span> st.selectbox(
+    <span style="color: #98be65;">"Feature"</span>,
+    numeric_cols,
+    index<span style="color: #51afef;">=</span>numeric_cols.index(<span style="color: #98be65;">"rssi"</span>) <span style="color: #51afef;">if</span> <span style="color: #98be65;">"rssi"</span> <span style="color: #51afef;">in</span> numeric_cols <span style="color: #51afef;">else</span> 0,
+    )
+    
+    <span style="color: #dcaeea;">max_points</span> <span style="color: #51afef;">=</span> st.slider(
+        <span style="color: #98be65;">"Max points per device (for KDE + rain)"</span>,
+        50, 1500, 500, 50,
+    )
+
+    <span style="color: #dcaeea;">x_spread</span> <span style="color: #51afef;">=</span> st.slider(
+        <span style="color: #98be65;">"Rain X-axis spread"</span>,
+        0.01, 0.20, 0.05, 0.01,
+        <span style="color: #c678dd;">help</span><span style="color: #51afef;">=</span><span style="color: #98be65;">"Horizontal dispersion of sampled points (kept non-overlapping)"</span>,
+    )
+
+    <span style="color: #dcaeea;">fig_height</span> <span style="color: #51afef;">=</span> st.slider(
+        <span style="color: #98be65;">"Figure height"</span>,
+        500, 1100, 720, 20,
+    )
+
+</code></pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-python"><code>
+<span style="color: #5B6268;"># </span><span style="color: #5B6268;">Utilities
+</span><span style="color: #5B6268;"># </span><span style="color: #5B6268;">=========
+</span>
+<span style="color: #51afef;">def</span> <span style="color: #c678dd;">to_rgba</span>(color: <span style="color: #c678dd;">str</span>, alpha: <span style="color: #c678dd;">float</span>) <span style="color: #51afef;">-&gt;</span> <span style="color: #c678dd;">str</span>:
+    <span style="color: #51afef;">if</span> color.startswith(<span style="color: #98be65;">"rgb"</span>):
+        <span style="color: #51afef;">return</span> color.replace(<span style="color: #98be65;">"rgb"</span>, <span style="color: #98be65;">"rgba"</span>).replace(<span style="color: #98be65;">")"</span>, f<span style="color: #98be65;">", </span>{alpha}<span style="color: #98be65;">)"</span>)
+    <span style="color: #dcaeea;">c</span> <span style="color: #51afef;">=</span> color.lstrip(<span style="color: #98be65;">"#"</span>)
+    <span style="color: #dcaeea;">r</span>, <span style="color: #dcaeea;">g</span>, <span style="color: #dcaeea;">b</span> <span style="color: #51afef;">=</span> <span style="color: #c678dd;">int</span>(c[0:2], 16), <span style="color: #c678dd;">int</span>(c[2:4], 16), <span style="color: #c678dd;">int</span>(c[4:6], 16)
+    <span style="color: #51afef;">return</span> f<span style="color: #98be65;">"rgba(</span>{r}<span style="color: #98be65;">,</span>{g}<span style="color: #98be65;">,</span>{b}<span style="color: #98be65;">,</span>{alpha}<span style="color: #98be65;">)"</span>
+
+
+<span style="color: #51afef;">def</span> <span style="color: #c678dd;">downsample</span>(x: np.ndarray, max_n: <span style="color: #c678dd;">int</span>, rng: np.random.Generator) <span style="color: #51afef;">-&gt;</span> np.ndarray:
+    <span style="color: #51afef;">if</span> <span style="color: #c678dd;">len</span>(x) <span style="color: #51afef;">&lt;=</span> max_n:
+        <span style="color: #51afef;">return</span> x
+    <span style="color: #51afef;">return</span> x[rng.choice(<span style="color: #c678dd;">len</span>(x), size<span style="color: #51afef;">=</span>max_n, replace<span style="color: #51afef;">=</span><span style="color: #a9a1e1;">False</span>)]
+
+<span style="color: #51afef;">def</span> <span style="color: #c678dd;">build_color_map</span>(df, color_col):
+    <span style="color: #dcaeea;">palette</span> <span style="color: #51afef;">=</span> px.colors.qualitative.Plotly
+    <span style="color: #dcaeea;">uniq</span> <span style="color: #51afef;">=</span> <span style="color: #c678dd;">sorted</span>(df[color_col].dropna().unique())
+    <span style="color: #51afef;">return</span> {u: palette[i <span style="color: #51afef;">%</span> <span style="color: #c678dd;">len</span>(palette)] <span style="color: #51afef;">for</span> i, u <span style="color: #51afef;">in</span> <span style="color: #c678dd;">enumerate</span>(uniq)}
+
+</code></pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-python"><code>
+<span style="color: #5B6268;"># </span><span style="color: #5B6268;">Plotting functions
+</span><span style="color: #5B6268;"># </span><span style="color: #5B6268;">==================
+</span>
+<span style="color: #51afef;">def</span> <span style="color: #c678dd;">raincloud_plot</span>(df: pd.DataFrame) <span style="color: #51afef;">-&gt;</span> go.Figure:
+
+    <span style="color: #dcaeea;">plot_df</span> <span style="color: #51afef;">=</span> df[[GROUP_COL, value_col]].dropna()
+    <span style="color: #dcaeea;">grouped</span> <span style="color: #51afef;">=</span> plot_df.groupby(GROUP_COL)[value_col]
+
+    <span style="color: #51afef;">if</span> order_by <span style="color: #51afef;">==</span> <span style="color: #98be65;">"median"</span>:
+        <span style="color: #dcaeea;">devices</span> <span style="color: #51afef;">=</span> grouped.median().sort_values().index.tolist()
+    <span style="color: #51afef;">elif</span> order_by <span style="color: #51afef;">==</span> <span style="color: #98be65;">"mean"</span>:
+        <span style="color: #dcaeea;">devices</span> <span style="color: #51afef;">=</span> grouped.mean().sort_values().index.tolist()
+    <span style="color: #51afef;">else</span>:
+        <span style="color: #dcaeea;">devices</span> <span style="color: #51afef;">=</span> <span style="color: #c678dd;">sorted</span>(plot_df[GROUP_COL].astype(<span style="color: #c678dd;">str</span>).unique())
+
+    <span style="color: #dcaeea;">xs</span> <span style="color: #51afef;">=</span> np.arange(<span style="color: #c678dd;">len</span>(devices), dtype<span style="color: #51afef;">=</span><span style="color: #c678dd;">float</span>)
+    <span style="color: #dcaeea;">x_map</span> <span style="color: #51afef;">=</span> <span style="color: #c678dd;">dict</span>(<span style="color: #c678dd;">zip</span>(devices, xs))
+
+    <span style="color: #dcaeea;">palette</span> <span style="color: #51afef;">=</span> px.colors.qualitative.Safe
+    <span style="color: #dcaeea;">colors</span> <span style="color: #51afef;">=</span> {d: palette[i <span style="color: #51afef;">%</span> <span style="color: #c678dd;">len</span>(palette)] <span style="color: #51afef;">for</span> i, d <span style="color: #51afef;">in</span> <span style="color: #c678dd;">enumerate</span>(devices)}
+
+    <span style="color: #dcaeea;">fig</span> <span style="color: #51afef;">=</span> go.Figure()
+    <span style="color: #dcaeea;">rng</span> <span style="color: #51afef;">=</span> np.random.default_rng(123)
+
+    <span style="color: #5B6268;"># </span><span style="color: #5B6268;">semantic order: data &#8594; box &#8594; KDE
+</span>    <span style="color: #dcaeea;">DATA_OFFSET</span> <span style="color: #51afef;">=</span> <span style="color: #51afef;">-</span>0.20
+    <span style="color: #dcaeea;">BOX_OFFSET</span>  <span style="color: #51afef;">=</span>  0.00
+    <span style="color: #dcaeea;">KDE_OFFSET</span>  <span style="color: #51afef;">=</span> <span style="color: #51afef;">+</span>0.15
+
+    <span style="color: #51afef;">for</span> d <span style="color: #51afef;">in</span> devices:
+        <span style="color: #dcaeea;">y</span> <span style="color: #51afef;">=</span> plot_df.loc[plot_df[GROUP_COL] <span style="color: #51afef;">==</span> d, value_col].to_numpy()
+        <span style="color: #51afef;">if</span> <span style="color: #c678dd;">len</span>(y) <span style="color: #51afef;">==</span> 0:
+            <span style="color: #51afef;">continue</span>
+
+        <span style="color: #dcaeea;">y_ds</span> <span style="color: #51afef;">=</span> downsample(y, max_points, rng)
+        <span style="color: #dcaeea;">x0</span> <span style="color: #51afef;">=</span> x_map[d]
+        <span style="color: #dcaeea;">col</span> <span style="color: #51afef;">=</span> colors[d]
+
+        <span style="color: #5B6268;"># </span><span style="color: #5B6268;">raw data
+</span>        fig.add_trace(
+            go.Scatter(
+                x<span style="color: #51afef;">=</span>x0 <span style="color: #51afef;">+</span> DATA_OFFSET <span style="color: #51afef;">+</span> rng.uniform(<span style="color: #51afef;">-</span>x_spread, x_spread, size<span style="color: #51afef;">=</span><span style="color: #c678dd;">len</span>(y_ds)),
+                y<span style="color: #51afef;">=</span>y_ds,
+                mode<span style="color: #51afef;">=</span><span style="color: #98be65;">"markers"</span>,
+                marker<span style="color: #51afef;">=</span><span style="color: #c678dd;">dict</span>(
+                    size<span style="color: #51afef;">=</span>4,
+                    color<span style="color: #51afef;">=</span>to_rgba(col, 0.55),
+                    line<span style="color: #51afef;">=</span><span style="color: #c678dd;">dict</span>(width<span style="color: #51afef;">=</span>0.3, color<span style="color: #51afef;">=</span>to_rgba(col, 0.85)),
+                ),
+                showlegend<span style="color: #51afef;">=</span><span style="color: #a9a1e1;">False</span>,
+            )
+        )
+
+        <span style="color: #5B6268;"># </span><span style="color: #5B6268;">box plot (narrow, reference)
+</span>        fig.add_trace(
+            go.Box(
+                x<span style="color: #51afef;">=</span>np.full(<span style="color: #c678dd;">len</span>(y_ds), x0 <span style="color: #51afef;">+</span> BOX_OFFSET),
+                y<span style="color: #51afef;">=</span>y_ds,
+                width<span style="color: #51afef;">=</span>0.15,
+                boxpoints<span style="color: #51afef;">=</span><span style="color: #a9a1e1;">False</span>,
+                quartilemethod<span style="color: #51afef;">=</span><span style="color: #98be65;">"linear"</span>,
+                line<span style="color: #51afef;">=</span><span style="color: #c678dd;">dict</span>(color<span style="color: #51afef;">=</span>col, width<span style="color: #51afef;">=</span>1.4),
+                fillcolor<span style="color: #51afef;">=</span>to_rgba(col, 0.18),
+                marker_color<span style="color: #51afef;">=</span>col,
+                showlegend<span style="color: #51afef;">=</span><span style="color: #a9a1e1;">False</span>,
+            )
+        )
+
+        <span style="color: #5B6268;"># </span><span style="color: #5B6268;">KDE (from downsample only)
+</span>        fig.add_trace(
+            go.Violin(
+                x<span style="color: #51afef;">=</span>np.full(<span style="color: #c678dd;">len</span>(y_ds), x0 <span style="color: #51afef;">+</span> KDE_OFFSET),
+                y<span style="color: #51afef;">=</span>y_ds,
+                side<span style="color: #51afef;">=</span><span style="color: #98be65;">"positive"</span>,
+                width<span style="color: #51afef;">=</span>0.55,
+                scalegroup<span style="color: #51afef;">=</span><span style="color: #98be65;">"all"</span>,
+                points<span style="color: #51afef;">=</span><span style="color: #a9a1e1;">False</span>,
+                spanmode<span style="color: #51afef;">=</span><span style="color: #98be65;">"hard"</span>,
+                line<span style="color: #51afef;">=</span><span style="color: #c678dd;">dict</span>(color<span style="color: #51afef;">=</span>col, width<span style="color: #51afef;">=</span>1.2),
+                fillcolor<span style="color: #51afef;">=</span>to_rgba(col, 0.35),
+                showlegend<span style="color: #51afef;">=</span><span style="color: #a9a1e1;">False</span>,
+            )
+        )
+
+    fig.update_layout(
+        height<span style="color: #51afef;">=</span>fig_height,
+        violingap<span style="color: #51afef;">=</span>0,
+        violinmode<span style="color: #51afef;">=</span><span style="color: #98be65;">"overlay"</span>,
+        boxmode<span style="color: #51afef;">=</span><span style="color: #98be65;">"overlay"</span>,
+        <span style="color: #5B6268;"># </span><span style="color: #5B6268;">title=dict(
+</span>        <span style="color: #5B6268;">#     </span><span style="color: #5B6268;">text=f"{value_col} by device_id",
+</span>        <span style="color: #5B6268;">#     </span><span style="color: #5B6268;">x=0.01,
+</span>        <span style="color: #5B6268;">#     </span><span style="color: #5B6268;">xanchor="left",
+</span>        <span style="color: #5B6268;"># </span><span style="color: #5B6268;">),
+</span>        xaxis<span style="color: #51afef;">=</span><span style="color: #c678dd;">dict</span>(
+            title<span style="color: #51afef;">=</span><span style="color: #98be65;">"device_id"</span>,
+            tickmode<span style="color: #51afef;">=</span><span style="color: #98be65;">"array"</span>,
+            tickvals<span style="color: #51afef;">=</span>xs.tolist(),
+            ticktext<span style="color: #51afef;">=</span>[<span style="color: #c678dd;">str</span>(d) <span style="color: #51afef;">for</span> d <span style="color: #51afef;">in</span> devices],
+            <span style="color: #c678dd;">range</span><span style="color: #51afef;">=</span>[<span style="color: #51afef;">-</span>0.9, <span style="color: #c678dd;">len</span>(devices) <span style="color: #51afef;">-</span> 0.1],
+            showgrid<span style="color: #51afef;">=</span><span style="color: #a9a1e1;">False</span>,
+        ),
+        yaxis<span style="color: #51afef;">=</span><span style="color: #c678dd;">dict</span>(
+            title<span style="color: #51afef;">=</span>value_col,
+            showgrid<span style="color: #51afef;">=</span><span style="color: #a9a1e1;">True</span>,
+        ),
+    )
+
+    <span style="color: #51afef;">return</span> fig
+
+
+</code></pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-python"><code>
+</code></pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-python"><code><span style="color: #51afef;">def</span> <span style="color: #c678dd;">marginal_cdf_plot</span>(df, feature, group_col):
+    <span style="color: #dcaeea;">cmap</span> <span style="color: #51afef;">=</span> build_color_map(df, group_col)
+    <span style="color: #dcaeea;">fig</span> <span style="color: #51afef;">=</span> go.Figure()
+
+    <span style="color: #51afef;">for</span> g, sub <span style="color: #51afef;">in</span> df.groupby(group_col):
+        <span style="color: #dcaeea;">vals</span> <span style="color: #51afef;">=</span> np.sort(sub[feature].dropna().to_numpy())
+        <span style="color: #51afef;">if</span> <span style="color: #c678dd;">len</span>(vals) <span style="color: #51afef;">==</span> 0:
+            <span style="color: #51afef;">continue</span>
+
+        <span style="color: #dcaeea;">cdf</span> <span style="color: #51afef;">=</span> np.arange(1, <span style="color: #c678dd;">len</span>(vals) <span style="color: #51afef;">+</span> 1) <span style="color: #51afef;">/</span> <span style="color: #c678dd;">len</span>(vals)
+
+        fig.add_trace(
+            go.Scatter(
+                x<span style="color: #51afef;">=</span>vals,
+                y<span style="color: #51afef;">=</span>cdf,
+                mode<span style="color: #51afef;">=</span><span style="color: #98be65;">"lines"</span>,
+                line_shape<span style="color: #51afef;">=</span><span style="color: #98be65;">"hv"</span>,
+                line_width<span style="color: #51afef;">=</span>2,
+                name<span style="color: #51afef;">=</span><span style="color: #c678dd;">str</span>(g),
+                marker_color<span style="color: #51afef;">=</span>cmap[g],
+                hovertemplate<span style="color: #51afef;">=</span>(
+                    f<span style="color: #98be65;">"</span>{group_col}<span style="color: #98be65;">: </span>{g}<span style="color: #98be65;">&lt;br&gt;"</span>
+                    f<span style="color: #98be65;">"</span>{feature}<span style="color: #98be65;">: %{{x:.2f}}&lt;br&gt;"</span>
+                    f<span style="color: #98be65;">"CDF: %{{y:.3f}}"</span>
+                ),
+            )
+        )
+
+    fig.update_xaxes(showline<span style="color: #51afef;">=</span><span style="color: #a9a1e1;">True</span>, linewidth<span style="color: #51afef;">=</span>2, zeroline<span style="color: #51afef;">=</span><span style="color: #a9a1e1;">False</span>)
+    fig.update_yaxes(showline<span style="color: #51afef;">=</span><span style="color: #a9a1e1;">True</span>, linewidth<span style="color: #51afef;">=</span>2, zeroline<span style="color: #51afef;">=</span><span style="color: #a9a1e1;">False</span>)
+
+    fig.update_layout(
+        height<span style="color: #51afef;">=</span>420,
+        margin<span style="color: #51afef;">=</span><span style="color: #c678dd;">dict</span>(l<span style="color: #51afef;">=</span>60, r<span style="color: #51afef;">=</span>30, t<span style="color: #51afef;">=</span>60, b<span style="color: #51afef;">=</span>50),
+        legend<span style="color: #51afef;">=</span><span style="color: #c678dd;">dict</span>(
+            orientation<span style="color: #51afef;">=</span><span style="color: #98be65;">"h"</span>,
+            yanchor<span style="color: #51afef;">=</span><span style="color: #98be65;">"bottom"</span>,
+            y<span style="color: #51afef;">=-</span>0.25,
+            xanchor<span style="color: #51afef;">=</span><span style="color: #98be65;">"center"</span>,
+            x<span style="color: #51afef;">=</span>0.5,
+        ),
+    )
+
+    <span style="color: #51afef;">return</span> fig
+
+
+</code></pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-python"><code><span style="color: #51afef;">def</span> <span style="color: #c678dd;">feature_vs_distance_plot</span>(df, feature, group_col, dist_col<span style="color: #51afef;">=</span><span style="color: #98be65;">"distance"</span>):
+    <span style="color: #dcaeea;">cmap</span> <span style="color: #51afef;">=</span> build_color_map(df, group_col)
+    <span style="color: #dcaeea;">fig</span> <span style="color: #51afef;">=</span> go.Figure()
+
+    <span style="color: #51afef;">for</span> g, sub <span style="color: #51afef;">in</span> df.groupby(group_col):
+        fig.add_trace(
+            go.Scatter(
+                x<span style="color: #51afef;">=</span>sub[dist_col],
+                y<span style="color: #51afef;">=</span>sub[feature],
+                mode<span style="color: #51afef;">=</span><span style="color: #98be65;">"markers"</span>,
+                marker<span style="color: #51afef;">=</span><span style="color: #c678dd;">dict</span>(size<span style="color: #51afef;">=</span>5, opacity<span style="color: #51afef;">=</span>0.7, color<span style="color: #51afef;">=</span>cmap[g]),
+                name<span style="color: #51afef;">=</span><span style="color: #c678dd;">str</span>(g),
+                hovertemplate<span style="color: #51afef;">=</span>(
+                    f<span style="color: #98be65;">"</span>{group_col}<span style="color: #98be65;">: </span>{g}<span style="color: #98be65;">&lt;br&gt;"</span>
+                    f<span style="color: #98be65;">"</span>{dist_col}<span style="color: #98be65;">: %{{x:.1f}}&lt;br&gt;"</span>
+                    f<span style="color: #98be65;">"</span>{feature}<span style="color: #98be65;">: %{{y:.2f}}"</span>
+                ),
+            )
+        )
+
+    fig.update_xaxes(
+        title<span style="color: #51afef;">=</span><span style="color: #98be65;">"distance [m]"</span>,
+        showline<span style="color: #51afef;">=</span><span style="color: #a9a1e1;">True</span>,
+        linewidth<span style="color: #51afef;">=</span>2,
+        zeroline<span style="color: #51afef;">=</span><span style="color: #a9a1e1;">False</span>,
+    )
+    fig.update_yaxes(
+        title<span style="color: #51afef;">=</span>feature,
+        showline<span style="color: #51afef;">=</span><span style="color: #a9a1e1;">True</span>,
+        linewidth<span style="color: #51afef;">=</span>2,
+        zeroline<span style="color: #51afef;">=</span><span style="color: #a9a1e1;">False</span>,
+    )
+
+    fig.update_layout(
+        height<span style="color: #51afef;">=</span>420,
+        margin<span style="color: #51afef;">=</span><span style="color: #c678dd;">dict</span>(l<span style="color: #51afef;">=</span>60, r<span style="color: #51afef;">=</span>30, t<span style="color: #51afef;">=</span>60, b<span style="color: #51afef;">=</span>50),
+        legend<span style="color: #51afef;">=</span><span style="color: #c678dd;">dict</span>(
+            orientation<span style="color: #51afef;">=</span><span style="color: #98be65;">"h"</span>,
+            yanchor<span style="color: #51afef;">=</span><span style="color: #98be65;">"bottom"</span>,
+            y<span style="color: #51afef;">=-</span>0.25,
+            xanchor<span style="color: #51afef;">=</span><span style="color: #98be65;">"center"</span>,
+            x<span style="color: #51afef;">=</span>0.5,
+        ),
+    )
+
+    <span style="color: #51afef;">return</span> fig
+
+
+</code></pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-python"><code><span style="color: #51afef;">def</span> <span style="color: #c678dd;">feature_vs_time_plot</span>(df, feature, group_col, time_col<span style="color: #51afef;">=</span><span style="color: #98be65;">"timestamp"</span>):
+    <span style="color: #5B6268;"># </span><span style="color: #5B6268;">ensure datetime conversion (non-destructive)
+</span>    <span style="color: #dcaeea;">t</span> <span style="color: #51afef;">=</span> pd.to_datetime(df[time_col], errors<span style="color: #51afef;">=</span><span style="color: #98be65;">"coerce"</span>)
+    <span style="color: #dcaeea;">dff</span> <span style="color: #51afef;">=</span> df.copy()
+    <span style="color: #dcaeea;">dff</span>[time_col] <span style="color: #51afef;">=</span> t
+
+    <span style="color: #dcaeea;">cmap</span> <span style="color: #51afef;">=</span> build_color_map(dff, group_col)
+    <span style="color: #dcaeea;">fig</span> <span style="color: #51afef;">=</span> go.Figure()
+
+    <span style="color: #51afef;">for</span> g, sub <span style="color: #51afef;">in</span> dff.groupby(group_col):
+        fig.add_trace(
+            go.Scatter(
+                x<span style="color: #51afef;">=</span>sub[time_col],
+                y<span style="color: #51afef;">=</span>sub[feature],
+                mode<span style="color: #51afef;">=</span><span style="color: #98be65;">"markers"</span>,
+                marker<span style="color: #51afef;">=</span><span style="color: #c678dd;">dict</span>(
+                    size<span style="color: #51afef;">=</span>4,
+                    opacity<span style="color: #51afef;">=</span>0.6,
+                    color<span style="color: #51afef;">=</span>cmap[g],
+                ),
+                name<span style="color: #51afef;">=</span><span style="color: #c678dd;">str</span>(g),
+                hovertemplate<span style="color: #51afef;">=</span>(
+                    f<span style="color: #98be65;">"</span>{group_col}<span style="color: #98be65;">: </span>{g}<span style="color: #98be65;">&lt;br&gt;"</span>
+                    f<span style="color: #98be65;">"time: %{{x|%Y-%m-%d %H:%M:%S}}&lt;br&gt;"</span>
+                    f<span style="color: #98be65;">"</span>{feature}<span style="color: #98be65;">: %{{y:.2f}}"</span>
+                ),
+            )
+        )
+
+    fig.update_xaxes(
+        title<span style="color: #51afef;">=</span><span style="color: #98be65;">"time"</span>,
+        showline<span style="color: #51afef;">=</span><span style="color: #a9a1e1;">True</span>,
+        linewidth<span style="color: #51afef;">=</span>2,
+        zeroline<span style="color: #51afef;">=</span><span style="color: #a9a1e1;">False</span>,
+    )
+    fig.update_yaxes(
+        title<span style="color: #51afef;">=</span>feature,
+        showline<span style="color: #51afef;">=</span><span style="color: #a9a1e1;">True</span>,
+        linewidth<span style="color: #51afef;">=</span>2,
+        zeroline<span style="color: #51afef;">=</span><span style="color: #a9a1e1;">False</span>,
+    )
+
+    fig.update_layout(
+        height<span style="color: #51afef;">=</span>420,
+        margin<span style="color: #51afef;">=</span><span style="color: #c678dd;">dict</span>(l<span style="color: #51afef;">=</span>60, r<span style="color: #51afef;">=</span>30, t<span style="color: #51afef;">=</span>60, b<span style="color: #51afef;">=</span>50),
+        legend<span style="color: #51afef;">=</span><span style="color: #c678dd;">dict</span>(
+            orientation<span style="color: #51afef;">=</span><span style="color: #98be65;">"h"</span>,
+            yanchor<span style="color: #51afef;">=</span><span style="color: #98be65;">"bottom"</span>,
+            y<span style="color: #51afef;">=-</span>0.25,
+            xanchor<span style="color: #51afef;">=</span><span style="color: #98be65;">"center"</span>,
+            x<span style="color: #51afef;">=</span>0.5,
+        ),
+    )
+
+    <span style="color: #51afef;">return</span> fig
+</code></pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-python"><code>
+
+
+st.markdown(r<span style="color: #98be65;">'''
+As described in the previous section, we define the training set as the tuple
+
+$$x = (t, \mathrm{id}, d, f, l_{\text{frame}}, \mathrm{RSSI}, \mathrm{SNR}, \mathrm{ToA}, \mathrm{SF})$$
+
+Here, one can explore every selected feature, its per-device distribution, and dependence on two key varaibles -- relative distance and time.
+
+'''</span>)
+
+st.markdown(r<span style="color: #98be65;">'''
+### Raincloud plots
+One of the best way to decribe 
+'''</span>)
+
+
+<span style="color: #dcaeea;">fig</span> <span style="color: #51afef;">=</span> raincloud_plot(df)
+st.plotly_chart(fig, use_container_width<span style="color: #51afef;">=</span><span style="color: #a9a1e1;">True</span>)
+
+st.markdown(r<span style="color: #98be65;">'''
+Let $\mathbf{X}=(X_1,\dots,X_d)$ be a random vector. The *marginal* CDF of component $X_i$ is
+
+$$
+F_{X_i}(x) \, = \, \mathrm{P}(X_i \le x).
+$$
+
+In some sense it is the CDF of $X_i$ alone, i.e. the joint distribution with all other coordinates &#8220;ignored&#8221;.
+'''</span>)
+
+st.plotly_chart(
+    marginal_cdf_plot(df, value_col, GROUP_COL),
+    use_container_width<span style="color: #51afef;">=</span><span style="color: #a9a1e1;">True</span>,
+)
+
+
+st.plotly_chart(
+    feature_vs_distance_plot(df, value_col, GROUP_COL),
+    use_container_width<span style="color: #51afef;">=</span><span style="color: #a9a1e1;">True</span>,
+
+)
+
+
+st.plotly_chart(
+    feature_vs_time_plot(df, value_col, GROUP_COL),
+    use_container_width<span style="color: #51afef;">=</span><span style="color: #a9a1e1;">True</span>,
+)
+
+</code></pre>
+</div>
 </div>
 </div>
 </div>

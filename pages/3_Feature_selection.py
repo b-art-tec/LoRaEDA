@@ -9,8 +9,6 @@ st.title("Feature selection")
 
 st.markdown(r'''
 
-- ```TODO``` improve justification for propagation parameters by addressing dependance on frequency as soon as we introduce the propagation model
-
 ### The rationale
 
 In this section we focus on feature selection and engineering,  i.e. what we will include in the final training set, what will be modified, and what can be dropped. In other words, we need to decide what will count as a representation of the network state, or at least of those aspects of the state that matter for detection. By network state, we mean an abstraction of the available data that allows us to distinguish legitimate traffic from anomalies.
@@ -32,15 +30,21 @@ We start with the assertion, that simplest useful digital twin will have certain
 $$
 \mathrm{SNR} = \mathrm{RSSI} - P_n,
 $$
-where $$P_n$$ is the noise power. Therefore, by including also SNR we will improve our representation. For readers that are more ML focused, we remind that we are working here in logarithmic scales so rations proportions are represented by differences and sums.
+where $$P_n$$ is the noise power. Therefore, by including also SNR we will improve our representation. For readers that are more ML focused, we remind that we are working here in logarithmic scales so ratios and proportions are represented by differences and sums respectively.
 
-Will other features matter as well? Let us investigate this through a propagation model. A standard choice is the log-distance path-loss model,
+Will other features matter as well? Let us investigate this through a propagation model. A standard choice for narrow bands on sub-GHz frequencies, where changes in frequencies have relatively low impact on the link quality, is the log-distance path-loss model,
 $$
 \def \PL {\mathrm{PL}}
 \PL(d) = \PL(d_0) + 10 n \log_{10} \left( \frac{d}{d_0} \right) + X_\sigma,
 $$
 where $\mathrm{PL}(d_0)$ is the path loss at a reference distance $$d_0$$, $$n$$ is the path-loss exponent, $d$ is the distance between transmitter and receiver, and $$X_\sigma$$ is a shadowing term, often $X_\sigma \sim \mathcal{N}(0, \sigma)$. So it seems that this segment of features is complete. We will expand on this later.
 
+
+**TX/RX gains and losses**
+
+The dataset includes detailed measurements of transmitter (TX) and receiver (RX) gains and losses. In practical deployments, these quantities are often not available and therefore should not form the core of a future generative model. However, our analysis suggests that they explain unusual variation observed in the dataset, for example in the relationship between distance and RSSI (you can explore it in the previous panel). For that reason, they are worth retaining in the present study as auxiliary variables. In future work, they may improve path-loss estimation or support a more informative _post hoc_ analysis.
+
+By a similar argument, one could also consider antennas geometry and other relevant "physical" aspets of the system. However, incorporating such variables would require a more detailed propagation model, such as the one discussed in the following subsection. However, in the production setting the required data may be insufficient or unavailable.
 
 **Feature engineering.**
 
@@ -93,5 +97,5 @@ Based on these considerations, we selected the following set of features.
 | `toa`          |     $$\mathrm{ToA}$$ | Time-on-air in seconds (captures airtime regime and potential policy violations).                   |
 | `sf`           |      $$\mathrm{SF}$$ | Spreading factor (ADR-relevant parameter; relates to coverage/airtime trade-offs and fingerprints). |
 
-
+Additinally, the training set will include TX and RX gains and losses (gtx, ltx, grx, lrx).
 ''')
