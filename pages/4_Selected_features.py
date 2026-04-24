@@ -10,6 +10,8 @@ import plotly.express as px
 import streamlit as st
 from plotly.subplots import make_subplots
 import plotly.express as px
+import scipy.stats as stats
+from scipy.stats import ks_2samp
 
 st.set_page_config(
     page_title="The dataset",
@@ -341,6 +343,56 @@ def feature_vs_time_plot(df, feature, group_col, time_col="timestamp"):
 
     return fig
 
+def ks_heatmap(df: pd.DataFrame, feature: str, group_col: str, max_points: int) -> go.Figure:
+    devices = sorted(df[group_col].dropna().unique())
+    n_dev = len(devices)
+    ks_mat = np.zeros((n_dev, n_dev))
+    rng = np.random.default_rng(123)
+
+    device_samples = {}
+    for dev in devices:
+        vals = df[df[group_col] == dev][feature].dropna().to_numpy()
+        if len(vals) == 0:
+            device_samples[dev] = np.array([])
+        elif len(vals) > max_points:
+            device_samples[dev] = rng.choice(vals, size=max_points, replace=False)
+        else:
+            device_samples[dev] = vals
+
+    for i, dev1 in enumerate(devices):
+        for j, dev2 in enumerate(devices):
+            if i == j:
+                ks_mat[i, j] = 0.0
+            else:
+                s1 = device_samples[dev1]
+                s2 = device_samples[dev2]
+                if len(s1) == 0 or len(s2) == 0:
+                    ks_mat[i, j] = np.nan
+                else:
+                    ks_mat[i, j] = ks_2samp(s1, s2).statistic
+
+    fig = go.Figure(data=go.Heatmap(
+        z=ks_mat,
+        x=devices,
+        y=devices,
+        colorscale='Viridis',
+        zmin=0, zmax=1,
+        colorbar=dict(title="KS statistic", thickness=15),
+        xgap=6,
+        ygap=6,
+        hovertemplate="Device %{x} vs %{y}<br>KS = %{z:.3f}<extra></extra>"
+    ))
+    fig.update_layout(
+        # height=420,
+        # title=f"Pairwise KS statistic - {feature}",
+        xaxis_showgrid=False,
+        yaxis_showgrid=False,
+        xaxis_title="Device",
+        yaxis_title="Device",
+        margin=dict(l=60, r=30, t=60, b=50)
+    )
+    return fig
+
 st.markdown(r'''
 As described in the previous section, we define the training set as the tuple
 
@@ -379,6 +431,14 @@ st.plotly_chart(
     marginal_cdf_plot(df, value_col, GROUP_COL),
     use_container_width=True,
 )
+
+st.markdown(r"""
+### Distributional similarity across devices (KS heatmap)
+
+The Kolmogorov-Smirnov statistic measures the maximum distance between two empirical CDFs.  
+""")
+fig_ks = ks_heatmap(df, value_col, GROUP_COL, max_points)
+st.plotly_chart(fig_ks, use_container_width=True)
 
 st.markdown(r'''
 ### Dependence on distance and time
